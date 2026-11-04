@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>每日新闻播报 · 小程序版</title>
+<style>
+  /* Mini-program page that lives IN the repo (public/mini.html).
+     It is deployed by the same GitHub Pages build as the main site,
+     and it reads data from the SAME origin (this site's own data/
+     folder), so it cannot drift from the website and it never needs
+     a cross-origin fetch to raw/jsDelivr/CDN at all. That is the fix
+     for the Muse artifact version, whose runtime blocks external
+     fetches entirely: same-origin Pages data loads in any browser.
+     Design follows the same editorial-minimal tokens as globals.css:
+     OKLCH neutrals, hairline rules, 760px reading column, theme
+     dropdown top-right, category colour as dot + label only. */
+  :root { color-scheme: light; }
+  [data-theme="magazine"] { --bg: oklch(.98 .012 85); --surface: oklch(1 0 0); --text: oklch(.24 .008 60); --muted: oklch(.52 .012 60); --border: oklch(.90 .012 85); --accent: oklch(.48 .18 25); }
+  [data-theme="newspaper"] { --bg: oklch(.99 .004 90); --surface: oklch(1 0 0); --text: oklch(.16 0 0); --muted: oklch(.42 0 0); --border: oklch(.86 .008 90); --accent: oklch(.16 0 0); }
+  [data-theme="dark"] { color-scheme: dark; --bg: oklch(.20 .02 260); --surface: oklch(.26 .03 260); --text: oklch(.92 .01 260); --muted: oklch(.70 .02 260); --border: oklch(.32 .03 260); --accent: oklch(.82 .10 230); }
+  [data-theme="light-card"] { --bg: oklch(.97 .004 260); --surface: oklch(1 0 0); --text: oklch(.25 .02 260); --muted: oklch(.52 .01 260); --border: oklch(.91 .006 260); --accent: oklch(.48 .20 260); }
+  [data-theme="podcast"] { --bg: oklch(.97 .03 85); --surface: oklch(1 0 0); --text: oklch(.25 .02 260); --muted: oklch(.52 .01 260); --border: oklch(.89 .04 85); --accent: oklch(.58 .18 50); }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.7; font-family: system-ui, -apple-system, "PingFang SC", "Noto Sans SC", sans-serif; font-size: clamp(1rem, .93rem + .38vw, 1.125rem); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 24px 20px; }
+  header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+  .kicker { font-size: 12px; letter-spacing: .15em; color: var(--muted); }
+  h1 { font-family: "Noto Serif SC", Georgia, serif; font-size: clamp(1.875rem, 1.5rem + 1.88vw, 2.5rem); line-height: 1.25; margin: 8px 0 0; }
+  .sub { font-size: 14px; color: var(--muted); margin-top: 4px; }
+  label { font-size: 12px; color: var(--muted); white-space: nowrap; }
+  select { margin-left: 8px; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: transparent; color: var(--text); font-size: 14px; max-width: 170px; }
+  .player { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 20px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .player button { background: none; border: none; color: var(--text); font-size: 14px; cursor: pointer; padding: 4px 2px; }
+  .player button.primary { color: var(--accent); font-weight: 700; }
+  .player .now { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+  .notice { font-size: 14px; color: var(--muted); margin-top: 8px; }
+  nav { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 16px; font-size: 14px; }
+  nav button { background: none; border: none; color: var(--muted); font-size: 14px; cursor: pointer; padding: 0; }
+  nav button.active { color: var(--accent); font-weight: 700; }
+  .daynav { display: flex; gap: 16px; margin-top: 24px; font-size: 14px; }
+  .daynav button { background: none; border: none; color: var(--accent); font-size: 14px; cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 4px; }
+  .daynav button:disabled { color: var(--muted); text-decoration: none; cursor: default; }
+  section.cat { margin-top: 40px; }
+  section.cat h2 { font-family: "Noto Serif SC", Georgia, serif; font-size: clamp(1.25rem, 1.10rem + .75vw, 1.5625rem); display: flex; align-items: baseline; gap: 8px; margin: 0; }
+  section.cat h2 .count { font-size: 14px; font-weight: 400; color: var(--muted); }
+  article { padding: 20px 0; border-top: 1px solid var(--border); }
+  article .meta { display: flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: .05em; }
+  article .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+  article h3 { font-size: clamp(1.125rem, 1.02rem + .53vw, 1.3125rem); line-height: 1.4; margin: 8px 0 0; }
+  article h3.top { font-size: clamp(1.5rem, 1.28rem + 1.10vw, 2rem); line-height: 1.3; }
+  article p { color: var(--muted); font-size: 15px; margin: 8px 0 0; }
+  article .actions { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px; font-size: 14px; color: var(--muted); }
+  article .actions button, article .actions a { color: var(--accent); background: none; border: none; font-size: 14px; cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 4px; }
+  article .actions a { color: var(--muted); }
+  footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); text-align: center; }
+  footer a { color: var(--muted); }
+  .skeleton { position: relative; overflow: hidden; background: var(--border); border-radius: 6px; height: 16px; margin: 12px 0; }
+  .skeleton::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent); animation: shimmer 1.5s infinite; }
+  @keyframes shimmer { to { transform: translateX(100%); } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
+</style>
+</head>
+<body data-theme="magazine">
+<div class="wrap">
+  <header>
+    <div>
+      <div class="kicker">NEWS_REPORTS · 每日 07:30 更新</div>
+      <h1>每日新闻播报</h1>
+      <div class="sub" id="subtitle">正在读取最新一期…</div>
+    </div>
+    <label for="theme-select">主题
+      <select id="theme-select" aria-label="切换主题">
+        <option value="magazine">杂志大图（默认）</option>
+        <option value="newspaper">头版日报</option>
+        <option value="dark">深色极客</option>
+        <option value="light-card">轻量卡片</option>
+        <option value="podcast">播客晨报</option>
+      </select>
+    </label>
+  </header>
+
+  <div class="player" role="region" aria-label="今日播报">
+    <strong>🎧 今日播报</strong>
+    <button id="btn-prev" aria-label="上一条">⏮ 上一条</button>
+    <button id="btn-play" class="primary" aria-label="播放全部">▶ 播放全部</button>
+    <button id="btn-next" aria-label="下一条">下一条 ⏭</button>
+    <label for="rate-select">倍速
+      <select id="rate-select" aria-label="播报倍速">
+        <option value="0.75">0.75x</option>
+        <option value="1">1x</option>
+        <option value="1.2" selected>1.2x</option>
+        <option value="1.5">1.5x</option>
+        <option value="2">2x</option>
+      </select>
+    </label>
+    <label for="voice-select">音色
+      <select id="voice-select" aria-label="朗读音色">
+        <option value="auto">自动优选</option>
+      </select>
+    </label>
+    <span class="now" id="now"></span>
+  </div>
+  <div class="notice" id="notice"></div>
+
+  <nav id="filters" aria-label="按分类筛选"></nav>
+  <div class="daynav">
+    <button id="btn-prevday">← 前一天</button>
+    <button id="btn-nextday" disabled>后一天 →</button>
+  </div>
+
+  <main id="main">
+    <div class="skeleton"></div><div class="skeleton" style="width:70%"></div><div class="skeleton" style="width:50%"></div>
+  </main>
+
+  <footer>
+    只展示标题、摘要与原文链接，不全文搬运；本页与网站版同一次发布、同一份数据。
+    <br><a href="./">网页版完整页面 ↗</a>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var COLORS = { politics: "#B91C1C", military: "#14532D", current: "#EA580C", research: "#2563EB", "large-models": "#7C3AED", ai: "#0F766E", tools: "#92400E" };
+  // Same-origin base: on Pages this page lives under /news_reports/,
+  // so data is at /news_reports/data/<date>.json. Locally it is data/.
+  var BASE = location.pathname.indexOf("/news_reports") === 0 ? "/news_reports" : "";
+  var state = { data: null, date: null, filter: "all", index: 0, playing: false, rate: 1.2, voice: "auto", chunk: 0, timer: null, noticed: false };
+
+  function beijingDate(offsetDays) {
+    var d = new Date(Date.now() + 8 * 3600 * 1000 + offsetDays * 86400000);
+    return d.toISOString().slice(0, 10);
+  }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+
+  function showNotice(msg) { document.getElementById("notice").textContent = msg; }
+  function setSubtitle() {
+    document.getElementById("subtitle").textContent = state.date
+      ? state.date + " · 政治 / 军事 / 时事 / 科研 / 大模型 / 人工智能 / 今日值得一试"
+      : "正在读取最新一期…";
+  }
+
+  async function loadDate(dateStr) {
+    // Same-origin only: no raw/jsDelivr/CDN, no cross-origin fetch.
+    var urls = [BASE + "/data/" + dateStr + ".json"];
+    if (BASE) urls.push("data/" + dateStr + ".json");
+    for (var i = 0; i < urls.length; i++) {
+      try {
+        var ctrl = new AbortController();
+        var to = setTimeout(function () { ctrl.abort(); }, 10000);
+        var r = await fetch(urls[i], { signal: ctrl.signal });
+        clearTimeout(to);
+        if (!r.ok) continue;
+        var j = await r.json();
+        if (!j || !j.sections) continue;
+        return j;
+      } catch (e) { /* try next same-origin path */ }
+    }
+    return null;
+  }
+
+  async function loadLatest() {
+    var main = document.getElementById("main");
+    for (var off = 0; off >= -3; off--) {
+      var d = beijingDate(off);
+      var j = await loadDate(d);
+      if (j) { state.data = j; state.date = j.date || d; state.index = 0; state.filter = "all"; render(); return; }
+    }
+    main.innerHTML = "<p>新闻数据没能加载出来（同站数据未找到）。请检查网络后重试。</p><p><button id=\"retry\" style=\"padding:8px 20px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--text);font-size:16px;cursor:pointer;\">重试</button></p>";
+    document.getElementById("retry").onclick = loadLatest;
+    document.getElementById("subtitle").textContent = "加载失败";
+  }
+
+  function flat() {
+    var out = [];
+    (state.data.sections || []).forEach(function (s) {
+      (s.items || []).forEach(function (it) { out.push(Object.assign({}, it, { sectionName: s.name })); });
+    });
+    return out;
+  }
+
+  function render() {
+    setSubtitle();
+    var sections = state.data.sections || [];
+    var filters = document.getElementById("filters");
+    filters.innerHTML = "";
+    function mkBtn(label, id) {
+      var b = document.createElement("button");
+      b.textContent = label;
+      if (state.filter === id) b.className = "active";
+      b.onclick = function () { state.filter = id; render(); };
+      return b;
+    }
+    filters.appendChild(mkBtn("全部", "all"));
+    sections.forEach(function (s) { filters.appendChild(mkBtn(s.name, s.id)); });
+
+    var main = document.getElementById("main");
+    var html = "";
+    var items = flat();
+    sections.forEach(function (s) {
+      if (state.filter !== "all" && state.filter !== s.id) return;
+      var color = COLORS[s.id] || "#374151";
+      html += '<section class="cat"><h2><span style="display:inline-block;width:8px;height:16px;border-radius:2px;background:' + color + '"></span>' + esc(s.name) + '<span class="count">' + (s.items || []).length + " 条</span></h2>";
+      (s.items || []).forEach(function (it, i) {
+        var isCurrent = items[state.index] && items[state.index].id === it.id;
+        html += '<article><div class="meta" style="color:' + color + '"><span class="dot" style="background:' + color + '"></span>' + esc(s.name) + (isCurrent && state.playing ? '<span style="color:var(--muted)">· 正在播报</span>' : "") + "</div>";
+        html += '<h3 class="' + (i === 0 && s.id === sections[0].id ? "top" : "") + '">' + esc(it.title) + "</h3>";
+        html += "<p>" + esc(it.summary || "") + "</p>";
+        html += '<div class="actions"><button data-play="' + esc(it.id) + '">' + (isCurrent && state.playing ? "暂停播报" : "播报本条") + '</button><a href="' + esc(it.url) + '" target="_blank" rel="noreferrer">原文 ↗</a><span>来源：' + esc(it.source || "") + "</span></div></article>";
+      });
+      html += "</section>";
+    });
+    main.innerHTML = html || "<p>本期暂无内容。</p>";
+    main.querySelectorAll("[data-play]").forEach(function (b) {
+      b.onclick = function () {
+        var idx = items.findIndex(function (f) { return f.id === b.getAttribute("data-play"); });
+        if (idx >= 0) playAt(idx);
+      };
+    });
+    updateNow();
+  }
+
+  function updateNow() {
+    var items = flat();
+    var cur = items[state.index];
+    document.getElementById("now").textContent = cur ? (state.index + 1) + "/" + items.length + " · " + cur.title : "";
+    document.getElementById("btn-play").textContent = state.playing ? "⏸ 暂停" : "▶ 播放全部";
+    var nextBtn = document.getElementById("btn-nextday");
+    nextBtn.disabled = !state.date || state.date >= beijingDate(0);
+  }
+
+  // ---- Speech: sentence chunks, natural voice first, resume from chunk.
+  function pickVoice() {
+    try {
+      var voices = speechSynthesis.getVoices() || [];
+      if (state.voice !== "auto") { var c = voices.find(function (v) { return v.name === state.voice; }); if (c) return c; }
+      var zh = voices.filter(function (v) { return (v.lang || "").toLowerCase().indexOf("zh") === 0; });
+      if (!zh.length) return null;
+      function score(v) {
+        var n = (v.name || "").toLowerCase();
+        if (n.indexOf("xiaoxiao") >= 0) return 100;
+        if (n.indexOf("yunyang") >= 0 || n.indexOf("yunxia") >= 0) return 90;
+        if (n.indexOf("natural") >= 0 || n.indexOf("neural") >= 0) return 80;
+        if (n.indexOf("google") >= 0) return 70;
+        if (n.indexOf("microsoft") >= 0) return 60;
+        return 10;
+      }
+      return zh.slice().sort(function (a, b) { return score(b) - score(a); })[0];
+    } catch (e) { return null; }
+  }
+  function loadVoices() {
+    try {
+      var sel = document.getElementById("voice-select");
+      var cur = sel.value;
+      sel.innerHTML = '<option value="auto">自动优选</option>';
+      (speechSynthesis.getVoices() || []).filter(function (v) { return (v.lang || "").toLowerCase().indexOf("zh") === 0; })
+        .forEach(function (v) { var o = document.createElement("option"); o.value = v.name; o.textContent = v.name; sel.appendChild(o); });
+      sel.value = cur;
+    } catch (e) {}
+  }
+  function splitSentences(text) {
+    var parts = (text || "").split(/(?<=[。！？；])/g).map(function (s) { return s.trim(); }).filter(Boolean);
+    var chunks = [];
+    parts.forEach(function (p) {
+      if (p.length <= 60) chunks.push(p);
+      else p.split(/(?<=，)/g).map(function (s) { return s.trim(); }).filter(Boolean).forEach(function (c) { chunks.push(c); });
+    });
+    return chunks.length ? chunks : [text];
+  }
+  function stopSpeech() {
+    try { speechSynthesis.cancel(); } catch (e) {}
+    if (state.timer) { clearTimeout(state.timer); state.timer = null; }
+  }
+  function speak(item, idx, startChunk) {
+    if (!("speechSynthesis" in window)) { showNotice("此浏览器不支持朗读。"); state.playing = false; updateNow(); return; }
+    stopSpeech();
+    var chunks = splitSentences(item.title + "。" + (item.summary || ""));
+    var voice = pickVoice();
+    var ci = startChunk || 0;
+    function next() {
+      if (!state.playing || idx !== state.index) return;
+      state.chunk = ci;
+      if (ci >= chunks.length) { state.timer = setTimeout(function () { playAt((idx + 1) % flat().length); }, 350); return; }
+      var u = new SpeechSynthesisUtterance(chunks[ci]);
+      u.lang = "zh-CN"; u.rate = state.rate; u.pitch = 1.0;
+      if (voice) u.voice = voice;
+      u.onend = function () { ci += 1; state.timer = setTimeout(next, 180); };
+      u.onerror = function () { ci += 1; state.timer = setTimeout(next, 180); };
+      speechSynthesis.speak(u);
+    }
+    next();
+  }
+  function playAt(i) {
+    var items = flat();
+    if (!items.length) return;
+    state.index = i; state.playing = true; state.chunk = 0;
+    if (!state.noticed) { showNotice("本期暂无预生成音频，浏览器朗读中（按句分段、优选自然女声）。"); state.noticed = true; }
+    render();
+    speak(items[i], i, 0);
+  }
+  function togglePlay() {
+    var items = flat();
+    if (!items.length) return;
+    if (state.playing) { state.playing = false; stopSpeech(); render(); return; }
+    state.playing = true;
+    speak(items[state.index], state.index, state.chunk);
+    render();
+  }
+
+  document.getElementById("btn-play").onclick = togglePlay;
+  document.getElementById("btn-prev").onclick = function () { var f = flat(); if (f.length) playAt((state.index - 1 + f.length) % f.length); };
+  document.getElementById("btn-next").onclick = function () { var f = flat(); if (f.length) playAt((state.index + 1) % f.length); };
+  document.getElementById("rate-select").onchange = function (e) {
+    state.rate = parseFloat(e.target.value);
+    if (state.playing) { var f = flat(); speak(f[state.index], state.index, state.chunk); }
+  };
+  document.getElementById("voice-select").onchange = function (e) {
+    state.voice = e.target.value;
+    if (state.playing) { var f = flat(); speak(f[state.index], state.index, state.chunk); }
+  };
+  document.getElementById("btn-prevday").onclick = async function () {
+    if (!state.date) return;
+    var d = new Date(state.date + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() - 1);
+    var ds = d.toISOString().slice(0, 10);
+    var j = await loadDate(ds);
+    if (j) { state.data = j; state.date = j.date || ds; state.index = 0; state.playing = false; stopSpeech(); render(); }
+    else showNotice("前一天暂无播报。");
+  };
+  document.getElementById("btn-nextday").onclick = async function () {
+    if (!state.date) return;
+    var d = new Date(state.date + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + 1);
+    var ds = d.toISOString().slice(0, 10);
+    if (ds > beijingDate(0)) return;
+    var j = await loadDate(ds);
+    if (j) { state.data = j; state.date = j.date || ds; state.index = 0; state.playing = false; stopSpeech(); render(); }
+    else showNotice("后一天暂无播报。");
+  };
+
+  var themeSel = document.getElementById("theme-select");
+  try {
+    var saved = localStorage.getItem("news-theme");
+    if (saved) { themeSel.value = saved; document.body.setAttribute("data-theme", saved); }
+  } catch (e) {}
+  themeSel.onchange = function (e) {
+    document.body.setAttribute("data-theme", e.target.value);
+    try { localStorage.setItem("news-theme", e.target.value); } catch (e2) {}
+  };
+
+  loadVoices();
+  try { speechSynthesis.addEventListener("voiceschanged", loadVoices); } catch (e) {}
+  loadLatest();
+})();
+</script>
+</body>
+</html>
