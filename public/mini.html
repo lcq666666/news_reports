@@ -36,9 +36,18 @@
   .player button.primary { color: var(--accent); font-weight: 700; }
   .player .now { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
   .notice { font-size: 14px; color: var(--muted); margin-top: 8px; }
-  nav { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 16px; font-size: 14px; }
-  nav button { background: none; border: none; color: var(--muted); font-size: 14px; cursor: pointer; padding: 0; }
-  nav button.active { color: var(--accent); font-weight: 700; }
+  /* Card + sub-page redesign 2026-11-04: home = one card per category,
+     category = one card per item, detail = stored excerpt in-page. */
+  .grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 16px; }
+  @media (min-width: 560px) { .grid { grid-template-columns: 1fr 1fr; } }
+  .card { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 20px; cursor: pointer; }
+  .card h3 { font-size: clamp(1.125rem, 1.02rem + .53vw, 1.3125rem); line-height: 1.4; margin: 8px 0 0; }
+  .card p { color: var(--muted); font-size: 15px; margin: 8px 0 0; }
+  .card .go { margin-top: 12px; font-size: 14px; font-weight: 700; color: var(--accent); }
+  .back { background: none; border: none; color: var(--accent); font-size: 14px; cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 4px; }
+  .detail-excerpt { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .detail-excerpt .label { font-size: 12px; letter-spacing: .05em; color: var(--muted); }
+  .detail-excerpt p { color: var(--muted); margin-top: 12px; }
   .daynav { display: flex; gap: 16px; margin-top: 24px; font-size: 14px; }
   .daynav button { background: none; border: none; color: var(--accent); font-size: 14px; cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 4px; }
   .daynav button:disabled { color: var(--muted); text-decoration: none; cursor: default; }
@@ -104,7 +113,6 @@
   </div>
   <div class="notice" id="notice"></div>
 
-  <nav id="filters" aria-label="按分类筛选"></nav>
   <div class="daynav">
     <button id="btn-prevday">← 前一天</button>
     <button id="btn-nextday" disabled>后一天 →</button>
@@ -126,7 +134,7 @@
   // Same-origin base: on Pages this page lives under /news_reports/,
   // so data is at /news_reports/data/<date>.json. Locally it is data/.
   var BASE = location.pathname.indexOf("/news_reports") === 0 ? "/news_reports" : "";
-  var state = { data: null, date: null, filter: "all", index: 0, playing: false, rate: 1.2, voice: "auto", chunk: 0, timer: null, noticed: false };
+  var state = { data: null, date: null, view: { type: "home" }, index: 0, playing: false, rate: 1.2, voice: "auto", chunk: 0, timer: null, noticed: false };
 
   function beijingDate(offsetDays) {
     var d = new Date(Date.now() + 8 * 3600 * 1000 + offsetDays * 86400000);
@@ -165,7 +173,7 @@
     for (var off = 0; off >= -3; off--) {
       var d = beijingDate(off);
       var j = await loadDate(d);
-      if (j) { state.data = j; state.date = j.date || d; state.index = 0; state.filter = "all"; render(); return; }
+      if (j) { state.data = j; state.date = j.date || d; state.index = 0; state.view = { type: "home" }; render(); return; }
     }
     main.innerHTML = "<p>新闻数据没能加载出来（同站数据未找到）。请检查网络后重试。</p><p><button id=\"retry\" style=\"padding:8px 20px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--text);font-size:16px;cursor:pointer;\">重试</button></p>";
     document.getElementById("retry").onclick = loadLatest;
@@ -180,40 +188,84 @@
     return out;
   }
 
+  function goView(v) { state.view = v; try { window.scrollTo(0, 0); } catch (e) {} render(); }
+
   function render() {
     setSubtitle();
     var sections = state.data.sections || [];
-    var filters = document.getElementById("filters");
-    filters.innerHTML = "";
-    function mkBtn(label, id) {
-      var b = document.createElement("button");
-      b.textContent = label;
-      if (state.filter === id) b.className = "active";
-      b.onclick = function () { state.filter = id; render(); };
-      return b;
-    }
-    filters.appendChild(mkBtn("全部", "all"));
-    sections.forEach(function (s) { filters.appendChild(mkBtn(s.name, s.id)); });
-
     var main = document.getElementById("main");
-    var html = "";
     var items = flat();
-    sections.forEach(function (s) {
-      if (state.filter !== "all" && state.filter !== s.id) return;
+    var html = "";
+    if (state.view.type === "category") {
+      var s = sections.find(function (x) { return x.id === state.view.id; });
+      if (!s) { goView({ type: "home" }); return; }
       var color = COLORS[s.id] || "#374151";
-      html += '<section class="cat"><h2><span style="display:inline-block;width:8px;height:16px;border-radius:2px;background:' + color + '"></span>' + esc(s.name) + '<span class="count">' + (s.items || []).length + " 条</span></h2>";
-      (s.items || []).forEach(function (it, i) {
+      html += '<p style="margin-top:24px"><button class="back" id="back-home">← 全部板块</button></p>';
+      html += '<h2 style="font-family:\'Noto Serif SC\',Georgia,serif;font-size:clamp(1.25rem,1.10rem + .75vw,1.5625rem);margin:16px 0 0"><span style="display:inline-block;width:8px;height:16px;border-radius:2px;background:' + color + '"></span> ' + esc(s.name) + ' <span style="font-size:14px;font-weight:400;color:var(--muted)">' + (s.items || []).length + " 条</span></h2>";
+      html += '<div class="grid">';
+      (s.items || []).forEach(function (it) {
         var isCurrent = items[state.index] && items[state.index].id === it.id;
-        html += '<article><div class="meta" style="color:' + color + '"><span class="dot" style="background:' + color + '"></span>' + esc(s.name) + (isCurrent && state.playing ? '<span style="color:var(--muted)">· 正在播报</span>' : "") + "</div>";
-        html += '<h3 class="' + (i === 0 && s.id === sections[0].id ? "top" : "") + '">' + esc(it.title) + "</h3>";
-        html += "<p>" + esc(it.summary || "") + "</p>";
-        html += '<div class="actions"><button data-play="' + esc(it.id) + '">' + (isCurrent && state.playing ? "暂停播报" : "播报本条") + '</button><a href="' + esc(it.url) + '" target="_blank" rel="noreferrer">原文 ↗</a><span>来源：' + esc(it.source || "") + "</span></div></article>";
+        html += '<article class="card" data-detail="' + esc(it.id) + '"><div class="meta" style="color:' + color + ';display:flex;align-items:center;gap:8px;font-size:12px"><span class="dot" style="background:' + color + '"></span>' + esc(s.name) + (isCurrent && state.playing ? '<span style="color:var(--muted)">· 正在播报</span>' : "") + "</div>";
+        html += "<h3>" + esc(it.title) + "</h3><p>" + esc(it.summary || "") + '</p><div class="go">查看详情 →</div>';
+        html += '<div class="actions" style="display:flex;flex-wrap:wrap;gap:16px;margin-top:12px;font-size:14px;color:var(--muted)"><button data-play="' + esc(it.id) + '" style="color:var(--accent);background:none;border:none;font-size:14px;cursor:pointer;padding:0;text-decoration:underline">' + (isCurrent && state.playing ? "暂停播报" : "播报本条") + '</button><a href="' + esc(it.url) + '" target="_blank" rel="noreferrer" style="color:var(--muted)">原文 ↗</a><span>来源：' + esc(it.source || "") + "</span></div></article>";
       });
-      html += "</section>";
-    });
+      html += "</div>";
+    } else if (state.view.type === "detail") {
+      var item = items.find(function (f) { return f.id === state.view.itemId; });
+      if (!item) { goView({ type: "home" }); return; }
+      var sec = sections.find(function (x) { return x.id === item.category; });
+      var sibs = sec ? (sec.items || []) : [];
+      var pos = sibs.findIndex(function (x) { return x.id === item.id; });
+      var prev = pos > 0 ? sibs[pos - 1] : null;
+      var next = pos >= 0 && pos < sibs.length - 1 ? sibs[pos + 1] : null;
+      var c2 = COLORS[item.category] || "#374151";
+      var isCur = items[state.index] && items[state.index].id === item.id;
+      var ex = (item.excerpt || "").trim();
+      html += '<p style="margin-top:24px;display:flex;gap:16px"><button class="back" id="back-home">← 全部板块</button><button class="back" id="back-cat">← ' + esc(sec ? sec.name : "返回板块") + "</button></p>";
+      html += '<article class="card" style="cursor:default;margin-top:16px"><div class="meta" style="color:' + c2 + ';display:flex;align-items:center;gap:8px;font-size:12px"><span class="dot" style="background:' + c2 + '"></span>' + esc(item.sectionName || item.category) + '<span style="color:var(--muted)">· 来源：' + esc(item.source || "") + " · " + esc(state.date || "") + "</span></div>";
+      html += '<h2 style="font-family:\'Noto Serif SC\',Georgia,serif;font-size:clamp(1.25rem,1.10rem + .75vw,1.5625rem);margin:12px 0 0">' + esc(item.title) + "</h2>";
+      html += '<p style="font-weight:700;color:var(--text);margin-top:16px">' + esc(item.summary || "") + "</p>";
+      html += '<div class="detail-excerpt"><div class="label">站内存档导读（来源导读存档，非全文）</div>';
+      if (ex && ex.length > 80 && ex !== item.summary) html += "<p>" + esc(ex) + "</p>";
+      else html += "<p>本条暂无更长的来源导读存档，以上摘要即为本站存档内容。完整内容请见原文。</p>";
+      html += "</div>";
+      html += '<div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:20px;font-size:14px;color:var(--muted)"><button data-play="' + esc(item.id) + '" style="color:var(--accent);background:none;border:none;font-size:14px;cursor:pointer;padding:0;text-decoration:underline">' + (isCur && state.playing ? "暂停播报" : "播报本条") + '</button><a href="' + esc(item.url) + '" target="_blank" rel="noreferrer" style="color:var(--muted)">原文 ↗</a></div></article>';
+      html += '<p style="display:flex;flex-wrap:wrap;gap:16px;margin-top:24px;font-size:14px"><button class="back" id="prev-card" ' + (prev ? "" : "disabled") + '>← 上一张卡片</button><button class="back" id="next-card" ' + (next ? "" : "disabled") + '>下一张卡片 →</button><span style="color:var(--muted)">' + (pos >= 0 ? (pos + 1) + " / " + sibs.length : "") + "</span></p>";
+      html += "<script type=\"application/json\" id=\"detail-nav\">" + JSON.stringify({ prev: prev ? prev.id : null, next: next ? next.id : null, cat: item.category }) + "<\/script>";
+    } else {
+      html += '<p style="color:var(--muted);font-size:14px;margin-top:24px">点一张板块卡片进去看这个主题的全部新闻，再点一张新闻卡片看详情。详情页站内存了一份导读，不用每次都跳原文。</p>';
+      html += '<div class="grid">';
+      sections.forEach(function (s) {
+        var col = COLORS[s.id] || "#374151";
+        var its = s.items || [];
+        html += '<article class="card" data-cat="' + esc(s.id) + '"><div style="display:flex;align-items:center;gap:8px;font-size:12px;color:' + col + '"><span class="dot" style="background:' + col + '"></span>' + esc(s.name) + '<span style="color:var(--muted)">' + its.length + " 条</span></div>";
+        if (its[0]) html += "<h3>" + esc(its[0].title) + "</h3>";
+        if (its[1]) html += "<p>" + esc(its[1].title) + "</p>";
+        html += '<div class="go">进入板块 →</div></article>';
+      });
+      html += "</div>";
+    }
     main.innerHTML = html || "<p>本期暂无内容。</p>";
+    var bh = document.getElementById("back-home");
+    if (bh) bh.onclick = function () { goView({ type: "home" }); };
+    var bc = document.getElementById("back-cat");
+    if (bc) bc.onclick = function () { var nav = JSON.parse(document.getElementById("detail-nav").textContent); goView({ type: "category", id: nav.cat }); };
+    var pc = document.getElementById("prev-card");
+    if (pc) pc.onclick = function () { var nav = JSON.parse(document.getElementById("detail-nav").textContent); if (nav.prev) goView({ type: "detail", itemId: nav.prev }); };
+    var nc = document.getElementById("next-card");
+    if (nc) nc.onclick = function () { var nav = JSON.parse(document.getElementById("detail-nav").textContent); if (nav.next) goView({ type: "detail", itemId: nav.next }); };
+    main.querySelectorAll("[data-cat]").forEach(function (el) {
+      el.onclick = function () { goView({ type: "category", id: el.getAttribute("data-cat") }); };
+    });
+    main.querySelectorAll("[data-detail]").forEach(function (el) {
+      el.onclick = function (e) {
+        if (e.target.closest("[data-play]") || e.target.closest("a")) return;
+        goView({ type: "detail", itemId: el.getAttribute("data-detail") });
+      };
+    });
     main.querySelectorAll("[data-play]").forEach(function (b) {
-      b.onclick = function () {
+      b.onclick = function (e) {
+        e.stopPropagation();
         var idx = items.findIndex(function (f) { return f.id === b.getAttribute("data-play"); });
         if (idx >= 0) playAt(idx);
       };
@@ -324,7 +376,7 @@
     var d = new Date(state.date + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() - 1);
     var ds = d.toISOString().slice(0, 10);
     var j = await loadDate(ds);
-    if (j) { state.data = j; state.date = j.date || ds; state.index = 0; state.playing = false; stopSpeech(); render(); }
+    if (j) { state.data = j; state.date = j.date || ds; state.index = 0; state.view = { type: "home" }; state.playing = false; stopSpeech(); render(); }
     else showNotice("前一天暂无播报。");
   };
   document.getElementById("btn-nextday").onclick = async function () {
@@ -333,7 +385,7 @@
     var ds = d.toISOString().slice(0, 10);
     if (ds > beijingDate(0)) return;
     var j = await loadDate(ds);
-    if (j) { state.data = j; state.date = j.date || ds; state.index = 0; state.playing = false; stopSpeech(); render(); }
+    if (j) { state.data = j; state.date = j.date || ds; state.index = 0; state.view = { type: "home" }; state.playing = false; stopSpeech(); render(); }
     else showNotice("后一天暂无播报。");
   };
 
