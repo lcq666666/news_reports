@@ -236,10 +236,16 @@ def fetch_rss_sources():
             for entry in feed.entries:
                 title = getattr(entry, "title", "")
                 summary = re.sub(r"<[^>]+>", "", getattr(entry, "summary", "") or getattr(entry, "description", ""))
+                # Stored copy for the detail sub-page: the feed's own
+                # excerpt (cleaned, capped), NOT full article text.
+                # The detail page shows this + the AI summary; the
+                # original link is still offered for the full article.
+                excerpt = normalise(summary)[:800]
                 items.append({
                     "category": classify(title, summary, src.get("category", "")),
                     "title": title,
                     "summary": summarise(title, summary),
+                    "excerpt": excerpt,
                     "url": getattr(entry, "link", ""),
                     "source": src["name"],
                     "image_url": None,
@@ -279,6 +285,7 @@ def fetch_gnews():
                     "category": category,
                     "title": art.get("title", ""),
                     "summary": summarise(art.get("title", ""), art.get("description", "")),
+                    "excerpt": normalise(art.get("description", ""))[:800],
                     "url": art.get("url", ""),
                     "source": (art.get("source") or {}).get("name", "GNews"),
                     "image_url": art.get("image"),
@@ -321,12 +328,41 @@ def sample_items(day: str):
                 "category": it["category"],
                 "title": it["title"],
                 "summary": it["summary"],
+                "excerpt": it.get("excerpt", ""),
                 "url": it["url"],
                 "source": it["source"],
                 "image_url": it.get("image_url"),
                 "audio_path": it["audio_path"],
             })
     return items
+
+
+def fetch_article_excerpt(url, timeout=8):
+    """Best-effort detail copy for the detail sub-page: first paragraphs
+    of the linked article, capped at 900 chars, attributed to the source.
+    Never full text, never a blocker: any failure returns '' and the
+    caller keeps the feed excerpt / summary instead."""
+    # Google News RSS links point at a Google interstitial, not the
+    # publisher page, so paragraph extraction there yields no article
+    # text; skip those and keep the feed excerpt instead.
+    if "news.google.com" in (url or ""):
+        return ""
+    try:
+        import requests
+        from html import unescape
+        r = requests.get(url, timeout=timeout, headers={"User-Agent": "Mozilla/5.0 (news-briefing excerpt)"})
+        if r.status_code != 200:
+            return ""
+        html = re.sub(r"<(script|style)[^>]*>.*?</\1>", " ", r.text, flags=re.S | re.I)
+        paras = re.findall(r"<p[^>]*>(.*?)</p>", html, flags=re.S | re.I)
+        texts = []
+        for p in paras:
+            t = normalise(unescape(re.sub(r"<[^>]+>", " ", p)))
+            if len(t) >= 40 and not t.startswith(("分享", "点击", "广告")):
+                texts.append(t)
+        return " ".join(texts)[:900]
+    except Exception:
+        return ""
 
 
 def write_outputs(day: str, items, out_dir: Path, db_path: Path, generate_audio_flag: bool = False):
@@ -341,6 +377,7 @@ def write_outputs(day: str, items, out_dir: Path, db_path: Path, generate_audio_
             "category": cat,
             "title": item["title"],
             "summary": item["summary"],
+            "excerpt": item.get("excerpt", ""),
             "url": item["url"],
             "source": item["source"],
             "image_url": item.get("image_url"),
@@ -393,6 +430,14 @@ def main() -> int:
         items = sample_items(args.date)
     else:
         items = cap_items(dedupe(fetch_rss_sources() + fetch_gnews()))
+        # Detail sub-page copy: only for items whose feed excerpt is
+        # short (Google News RSS excerpts are ~30-60 chars); best-effort,
+        # capped, never blocks publishing on failure.
+        for it in items:
+            if len(it.get("excerpt", "")) < 200 and it.get("url"):
+                art = fetch_article_excerpt(it["url"])
+                if len(art) > len(it.get("excerpt", "")) + 50:
+                    it["excerpt"] = art
     json_path = write_outputs(args.date, items, Path(args.out_dir), Path(args.db), generate_audio_flag=args.audio)
     print(f"Wrote {len(items)} items -> {json_path} and {args.db}")
     return 0
