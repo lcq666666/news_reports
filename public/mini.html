@@ -5,64 +5,89 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>每日新闻播报 · 小程序版</title>
 <style>
-  /* Mini-program page that lives IN the repo (public/mini.html).
-     It is deployed by the same GitHub Pages build as the main site,
-     and it reads data from the SAME origin (this site's own data/
-     folder), so it cannot drift from the website and it never needs
-     a cross-origin fetch to raw/jsDelivr/CDN at all. That is the fix
-     for the Muse artifact version, whose runtime blocks external
-     fetches entirely: same-origin Pages data loads in any browser.
-     Design follows the same editorial-minimal tokens as globals.css:
-     OKLCH neutrals, hairline rules, 760px reading column, theme
-     dropdown top-right, category colour as dot + label only. */
+  /* Local v2, 2026-11-04 (user-approved local spec, NOT pushed):
+     - Home: one LARGE card per section (not a small card with two
+       titles). Click a card -> section sub-page -> news cards.
+       Click a title -> detail sub-page: content, then a References
+       section (original link + source + a title search for more
+       coverage), prev/next card switching, play this item.
+     - Honest detail: today's items each have only one url and one
+       source string, and image_url is null for all 58, so no
+       invented references or images. An image is shown ONLY when
+       the item really carries image_url (HelloGitHub monthly picks
+       below do, from the issue page itself). Stored archive is the
+       feed excerpt (<=800 chars), never scraped full text.
+     - Tools: no fixed 8-item cap in the UI; today's 4 edition items
+       plus a labelled HelloGitHub monthly section (issue 127,
+       2026-10-28, monthly, NOT today's news).
+     - 5 themes are deliberately different layouts, not just colours:
+       magazine (hero, serif, staggered grid, fade-slide),
+       newspaper (hairlines, square corners, small caps, one column),
+       dark (dark, monospace, glow, slide),
+       light-card (rounded, soft shadow, spring lift),
+       podcast (vertical timeline, prominent player).
+     - Data: same-origin /data/<date>.json only. On Pages BASE is
+       /news_reports; locally (localhost server root = public/) it
+       is empty, so fetch "data/<date>.json". Never file://. */
   :root { color-scheme: light; }
-  [data-theme="magazine"] { --bg: oklch(.98 .012 85); --surface: oklch(1 0 0); --text: oklch(.24 .008 60); --muted: oklch(.52 .012 60); --border: oklch(.90 .012 85); --accent: oklch(.48 .18 25); }
-  [data-theme="newspaper"] { --bg: oklch(.99 .004 90); --surface: oklch(1 0 0); --text: oklch(.16 0 0); --muted: oklch(.42 0 0); --border: oklch(.86 .008 90); --accent: oklch(.16 0 0); }
-  [data-theme="dark"] { color-scheme: dark; --bg: oklch(.20 .02 260); --surface: oklch(.26 .03 260); --text: oklch(.92 .01 260); --muted: oklch(.70 .02 260); --border: oklch(.32 .03 260); --accent: oklch(.82 .10 230); }
-  [data-theme="light-card"] { --bg: oklch(.97 .004 260); --surface: oklch(1 0 0); --text: oklch(.25 .02 260); --muted: oklch(.52 .01 260); --border: oklch(.91 .006 260); --accent: oklch(.48 .20 260); }
-  [data-theme="podcast"] { --bg: oklch(.97 .03 85); --surface: oklch(1 0 0); --text: oklch(.25 .02 260); --muted: oklch(.52 .01 260); --border: oklch(.89 .04 85); --accent: oklch(.58 .18 50); }
+  [data-theme="magazine"] { --bg: #faf6ef; --surface: #fffdf8; --text: #26221c; --muted: #7a7264; --border: #e5ddcc; --accent: #b91c1c; --font-head: "Noto Serif SC", Georgia, serif; --font-body: system-ui, -apple-system, "PingFang SC", "Noto Sans SC", sans-serif; --radius: 16px; --shadow: none; }
+  [data-theme="newspaper"] { --bg: #fdfdf8; --surface: #ffffff; --text: #111111; --muted: #555555; --border: #111111; --accent: #111111; --font-head: Georgia, "Noto Serif SC", serif; --font-body: Georgia, "Noto Serif SC", serif; --radius: 0px; --shadow: none; }
+  [data-theme="dark"] { color-scheme: dark; --bg: #0d1117; --surface: #161b22; --text: #e6edf3; --muted: #8b949e; --border: #30363d; --accent: #58a6ff; --font-head: ui-monospace, "SF Mono", Menlo, monospace; --font-body: ui-monospace, "SF Mono", Menlo, monospace; --radius: 8px; --shadow: 0 0 24px rgba(88,166,255,.15); }
+  [data-theme="light-card"] { --bg: #f0f4f8; --surface: #ffffff; --text: #1f2937; --muted: #6b7280; --border: #e5e7eb; --accent: #7c3aed; --font-head: system-ui, -apple-system, "PingFang SC", sans-serif; --font-body: system-ui, -apple-system, "PingFang SC", sans-serif; --radius: 20px; --shadow: 0 4px 20px rgba(0,0,0,.08); }
+  [data-theme="podcast"] { --bg: #fff7ed; --surface: #ffffff; --text: #292524; --muted: #78716c; --border: #fed7aa; --accent: #ea580c; --font-head: system-ui, -apple-system, "PingFang SC", sans-serif; --font-body: system-ui, -apple-system, "PingFang SC", sans-serif; --radius: 12px; --shadow: none; }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.7; font-family: system-ui, -apple-system, "PingFang SC", "Noto Sans SC", sans-serif; font-size: clamp(1rem, .93rem + .38vw, 1.125rem); }
+  body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.7; font-family: var(--font-body); font-size: clamp(1rem, .93rem + .38vw, 1.125rem); transition: background .3s, color .3s; }
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
   .wrap { max-width: 760px; margin: 0 auto; padding: 24px 20px; }
   header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
-  .kicker { font-size: 12px; letter-spacing: .15em; color: var(--muted); }
-  h1 { font-family: "Noto Serif SC", Georgia, serif; font-size: clamp(1.875rem, 1.5rem + 1.88vw, 2.5rem); line-height: 1.25; margin: 8px 0 0; }
+  .kicker { font-size: 12px; letter-spacing: .15em; color: var(--muted); text-transform: uppercase; }
+  h1 { font-family: var(--font-head); font-size: clamp(1.875rem, 1.5rem + 1.88vw, 2.5rem); line-height: 1.25; margin: 8px 0 0; }
   .sub { font-size: 14px; color: var(--muted); margin-top: 4px; }
   label { font-size: 12px; color: var(--muted); white-space: nowrap; }
-  select { margin-left: 8px; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: transparent; color: var(--text); font-size: 14px; max-width: 170px; }
+  select { margin-left: 8px; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--text); font-size: 14px; max-width: 170px; }
   .player { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 20px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  [data-theme="podcast"] .player { background: var(--surface); border: 2px solid var(--accent); border-radius: var(--radius); padding: 16px; margin-top: 16px; }
   .player button { background: none; border: none; color: var(--text); font-size: 14px; cursor: pointer; padding: 4px 2px; }
   .player button.primary { color: var(--accent); font-weight: 700; }
   .player .now { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
   .notice { font-size: 14px; color: var(--muted); margin-top: 8px; }
-  /* Card + sub-page redesign 2026-11-04: home = one card per category,
-     category = one card per item, detail = stored excerpt in-page. */
-  .grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 16px; }
-  @media (min-width: 560px) { .grid { grid-template-columns: 1fr 1fr; } }
-  .card { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 20px; cursor: pointer; }
-  .card h3 { font-size: clamp(1.125rem, 1.02rem + .53vw, 1.3125rem); line-height: 1.4; margin: 8px 0 0; }
-  .card p { color: var(--muted); font-size: 15px; margin: 8px 0 0; }
-  .card .go { margin-top: 12px; font-size: 14px; font-weight: 700; color: var(--accent); }
-  .back { background: none; border: none; color: var(--accent); font-size: 14px; cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 4px; }
-  .detail-excerpt { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); }
-  .detail-excerpt .label { font-size: 12px; letter-spacing: .05em; color: var(--muted); }
-  .detail-excerpt p { color: var(--muted); margin-top: 12px; }
   .daynav { display: flex; gap: 16px; margin-top: 24px; font-size: 14px; }
   .daynav button { background: none; border: none; color: var(--accent); font-size: 14px; cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 4px; }
   .daynav button:disabled { color: var(--muted); text-decoration: none; cursor: default; }
-  section.cat { margin-top: 40px; }
-  section.cat h2 { font-family: "Noto Serif SC", Georgia, serif; font-size: clamp(1.25rem, 1.10rem + .75vw, 1.5625rem); display: flex; align-items: baseline; gap: 8px; margin: 0; }
-  section.cat h2 .count { font-size: 14px; font-weight: 400; color: var(--muted); }
-  article { padding: 20px 0; border-top: 1px solid var(--border); }
-  article .meta { display: flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: .05em; }
-  article .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
-  article h3 { font-size: clamp(1.125rem, 1.02rem + .53vw, 1.3125rem); line-height: 1.4; margin: 8px 0 0; }
-  article h3.top { font-size: clamp(1.5rem, 1.28rem + 1.10vw, 2rem); line-height: 1.3; }
-  article p { color: var(--muted); font-size: 15px; margin: 8px 0 0; }
-  article .actions { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px; font-size: 14px; color: var(--muted); }
-  article .actions button, article .actions a { color: var(--accent); background: none; border: none; font-size: 14px; cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 4px; }
-  article .actions a { color: var(--muted); }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 20px; margin-top: 20px; }
+  @media (min-width: 560px) {
+    [data-theme="magazine"] .grid, [data-theme="dark"] .grid, [data-theme="light-card"] .grid { grid-template-columns: 1fr 1fr; }
+    [data-theme="magazine"] .grid .card:first-child { grid-column: 1 / -1; }
+  }
+  [data-theme="podcast"] .grid { border-left: 3px solid var(--accent); padding-left: 20px; margin-left: 8px; }
+  .card { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); padding: 24px; cursor: pointer; box-shadow: var(--shadow); animation: cardIn .45s ease both; }
+  [data-theme="magazine"] .card { animation-name: fadeSlide; }
+  [data-theme="dark"] .card { animation-name: slideIn; }
+  [data-theme="light-card"] .card { transition: transform .35s cubic-bezier(.34,1.56,.64,1), box-shadow .35s; }
+  [data-theme="light-card"] .card:hover { transform: translateY(-4px) scale(1.01); box-shadow: 0 12px 32px rgba(0,0,0,.14); }
+  [data-theme="newspaper"] .card { animation: none; border-width: 1px 1px 3px 1px; }
+  @keyframes fadeSlide { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: none; } }
+  @keyframes cardIn { from { opacity: 0; } to { opacity: 1; } }
+  .card.hero h3 { font-size: clamp(1.5rem, 1.28rem + 1.10vw, 2rem); }
+  .card h3 { font-family: var(--font-head); font-size: clamp(1.125rem, 1.02rem + .53vw, 1.3125rem); line-height: 1.4; margin: 8px 0 0; }
+  .card p { color: var(--muted); font-size: 15px; margin: 8px 0 0; }
+  .card .meta { display: flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: .05em; }
+  .card .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+  [data-theme="newspaper"] .card .dot { border-radius: 0; }
+  .card .go { margin-top: 14px; font-size: 14px; font-weight: 700; color: var(--accent); }
+  .card img { width: 100%; border-radius: calc(var(--radius) - 4px); margin-top: 12px; display: block; }
+  .back { background: none; border: none; color: var(--accent); font-size: 14px; cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 4px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px; font-size: 14px; color: var(--muted); }
+  .actions button, .actions a { color: var(--accent); background: none; border: none; font-size: 14px; cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 4px; }
+  .actions a { color: var(--muted); }
+  .refs { margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .refs .label { font-size: 12px; letter-spacing: .05em; color: var(--muted); text-transform: uppercase; }
+  .refs ul { margin: 12px 0 0; padding-left: 20px; color: var(--muted); font-size: 15px; }
+  .refs a { color: var(--accent); word-break: break-all; }
+  .detail-excerpt { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .detail-excerpt .label { font-size: 12px; letter-spacing: .05em; color: var(--muted); }
+  .detail-excerpt p { color: var(--muted); margin-top: 12px; }
   footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); text-align: center; }
   footer a { color: var(--muted); }
   .skeleton { position: relative; overflow: hidden; background: var(--border); border-radius: 6px; height: 16px; margin: 12px 0; }
@@ -83,9 +108,9 @@
       <select id="theme-select" aria-label="切换主题">
         <option value="magazine">杂志大图（默认）</option>
         <option value="newspaper">头版日报</option>
-        <option value="dark">深色极客</option>
+        <option value="dark">暗夜极客</option>
         <option value="light-card">轻量卡片</option>
-        <option value="podcast">播客晨报</option>
+        <option value="podcast">播客时间线</option>
       </select>
     </label>
   </header>
@@ -123,7 +148,7 @@
   </main>
 
   <footer>
-    只展示标题、摘要与原文链接，不全文搬运；本页与网站版同一次发布、同一份数据。
+    详情页为来源导读存档，不全文搬运；完整内容请见原文链接。本页与网站版同一次发布、同一份数据。
     <br><a href="./">网页版完整页面 ↗</a>
   </footer>
 </div>
@@ -131,8 +156,26 @@
 <script>
 (function () {
   var COLORS = { politics: "#B91C1C", military: "#14532D", current: "#EA580C", research: "#2563EB", "large-models": "#7C3AED", ai: "#0F766E", tools: "#92400E" };
-  // Same-origin base: on Pages this page lives under /news_reports/,
-  // so data is at /news_reports/data/<date>.json. Locally it is data/.
+  var SECTION_DESC = {
+    politics: "政坛动向与政策信号",
+    military: "防务动态与军事观察",
+    current: "正在发生的时事",
+    research: "科研进展与学术动态",
+    "large-models": "大模型发布与行业动向",
+    ai: "人工智能应用与讨论",
+    tools: "好用的项目、工具与资源，不限量"
+  };
+  // HelloGitHub monthly picks, labelled as monthly (NOT today's news).
+  // Verified 2026-11-04: RSS https://hellogithub.com/rss, latest issue
+  // 127, published 2026-10-28. Descriptions below are short summaries
+  // of the issue page itself; images are the issue page's own images.
+  var HG_PICKS = [
+    { title: "Filee · 离线文件格式转换器", summary: "按住 Ctrl 拖动文件，光标旁弹出格式圆环，放到目标格式即完成转换，支持 200 多种格式，文件全程不上传。", url: "https://hellogithub.com/periodical/volume/127", source: "HelloGitHub 第 127 期（月刊，2026-10-28）", image_url: "https://img-global.cheatsheet.store/i/WtL0ZjK9AeU3vdo_1792741211.jpg" },
+    { title: "omni-tools · 可自托管的全能在线工具箱", summary: "图片、音视频、PDF、文本、日期时间、数学计算等日常工具集合，所有文件都在本地浏览器中处理。", url: "https://hellogithub.com/periodical/volume/127", source: "HelloGitHub 第 127 期（月刊，2026-10-28）", image_url: "https://img-global.cheatsheet.store/i/2QeJjvZhLWdbo3I_1792849243.png" },
+    { title: "magpie · 一键切换 AI 编程助手的模型", summary: "通过本地网关转换接口格式，让不同编程助手用上不同厂商的模型，额度用完后自动切换账号。", url: "https://hellogithub.com/periodical/volume/127", source: "HelloGitHub 第 127 期（月刊，2026-10-28）", image_url: "https://img-global.cheatsheet.store/i/yabu8ZKGAxBz5o4_1792766512.png" },
+    { title: "miniserve · 极简的共享文件 HTTP 服务器", summary: "一个文件就能通过 HTTP 共享文件和目录，支持认证、上传、打包下载、搜索、扫码访问和 WebDAV。", url: "https://hellogithub.com/periodical/volume/127", source: "HelloGitHub 第 127 期（月刊，2026-10-28）", image_url: "https://img-global.cheatsheet.store/i/CW0eI7EM62BsUfQ_1792929788.png" },
+    { title: "PicLite · 极简的本地图片压缩工具", summary: "批量压缩、拖动对比画质、格式转换、缩放和水印，自动比较候选结果选出体积更小的文件，全程本机处理。", url: "https://hellogithub.com/periodical/volume/127", source: "HelloGitHub 第 127 期（月刊，2026-10-28）", image_url: "https://img-global.cheatsheet.store/i/6aeiVF3K7w5c4Ux_1792935209.jpg" }
+  ];
   var BASE = location.pathname.indexOf("/news_reports") === 0 ? "/news_reports" : "";
   var state = { data: null, date: null, view: { type: "home" }, index: 0, playing: false, rate: 1.2, voice: "auto", chunk: 0, timer: null, noticed: false };
 
@@ -141,16 +184,13 @@
     return d.toISOString().slice(0, 10);
   }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
-
   function showNotice(msg) { document.getElementById("notice").textContent = msg; }
   function setSubtitle() {
     document.getElementById("subtitle").textContent = state.date
       ? state.date + " · 政治 / 军事 / 时事 / 科研 / 大模型 / 人工智能 / 今日值得一试"
       : "正在读取最新一期…";
   }
-
   async function loadDate(dateStr) {
-    // Same-origin only: no raw/jsDelivr/CDN, no cross-origin fetch.
     var urls = [BASE + "/data/" + dateStr + ".json"];
     if (BASE) urls.push("data/" + dateStr + ".json");
     for (var i = 0; i < urls.length; i++) {
@@ -163,11 +203,10 @@
         var j = await r.json();
         if (!j || !j.sections) continue;
         return j;
-      } catch (e) { /* try next same-origin path */ }
+      } catch (e) {}
     }
     return null;
   }
-
   async function loadLatest() {
     var main = document.getElementById("main");
     for (var off = 0; off >= -3; off--) {
@@ -179,7 +218,6 @@
     document.getElementById("retry").onclick = loadLatest;
     document.getElementById("subtitle").textContent = "加载失败";
   }
-
   function flat() {
     var out = [];
     (state.data.sections || []).forEach(function (s) {
@@ -187,9 +225,10 @@
     });
     return out;
   }
-
   function goView(v) { state.view = v; try { window.scrollTo(0, 0); } catch (e) {} render(); }
-
+  function imgTag(item) {
+    return item.image_url ? '<img src="' + esc(item.image_url) + '" alt="" loading="lazy">' : "";
+  }
   function render() {
     setSubtitle();
     var sections = state.data.sections || [];
@@ -201,14 +240,21 @@
       if (!s) { goView({ type: "home" }); return; }
       var color = COLORS[s.id] || "#374151";
       html += '<p style="margin-top:24px"><button class="back" id="back-home">← 全部板块</button></p>';
-      html += '<h2 style="font-family:\'Noto Serif SC\',Georgia,serif;font-size:clamp(1.25rem,1.10rem + .75vw,1.5625rem);margin:16px 0 0"><span style="display:inline-block;width:8px;height:16px;border-radius:2px;background:' + color + '"></span> ' + esc(s.name) + ' <span style="font-size:14px;font-weight:400;color:var(--muted)">' + (s.items || []).length + " 条</span></h2>";
+      html += '<h2 style="font-family:var(--font-head);font-size:clamp(1.5rem,1.28rem + 1.10vw,2rem);margin:16px 0 0">' + esc(s.name) + ' <span style="font-size:14px;font-weight:400;color:var(--muted)">' + (s.items || []).length + " 条</span></h2>";
+      html += '<p style="color:var(--muted);font-size:14px">' + esc(SECTION_DESC[s.id] || "") + "</p>";
       html += '<div class="grid">';
       (s.items || []).forEach(function (it) {
         var isCurrent = items[state.index] && items[state.index].id === it.id;
-        html += '<article class="card" data-detail="' + esc(it.id) + '"><div class="meta" style="color:' + color + ';display:flex;align-items:center;gap:8px;font-size:12px"><span class="dot" style="background:' + color + '"></span>' + esc(s.name) + (isCurrent && state.playing ? '<span style="color:var(--muted)">· 正在播报</span>' : "") + "</div>";
-        html += "<h3>" + esc(it.title) + "</h3><p>" + esc(it.summary || "") + '</p><div class="go">查看详情 →</div>';
-        html += '<div class="actions" style="display:flex;flex-wrap:wrap;gap:16px;margin-top:12px;font-size:14px;color:var(--muted)"><button data-play="' + esc(it.id) + '" style="color:var(--accent);background:none;border:none;font-size:14px;cursor:pointer;padding:0;text-decoration:underline">' + (isCurrent && state.playing ? "暂停播报" : "播报本条") + '</button><a href="' + esc(it.url) + '" target="_blank" rel="noreferrer" style="color:var(--muted)">原文 ↗</a><span>来源：' + esc(it.source || "") + "</span></div></article>";
+        html += '<article class="card" data-detail="' + esc(it.id) + '"><div class="meta" style="color:' + color + '"><span class="dot" style="background:' + color + '"></span>' + esc(s.name) + (isCurrent && state.playing ? '<span style="color:var(--muted)">· 正在播报</span>' : "") + "</div>";
+        html += "<h3>" + esc(it.title) + "</h3>" + imgTag(it) + "<p>" + esc(it.summary || "") + '</p><div class="go">查看详情 →</div>';
+        html += '<div class="actions"><button data-play="' + esc(it.id) + '">' + (isCurrent && state.playing ? "暂停播报" : "播报本条") + '</button><a href="' + esc(it.url) + '" target="_blank" rel="noreferrer">原文 ↗</a><span>来源：' + esc(it.source || "") + "</span></div></article>";
       });
+      if (s.id === "tools") {
+        html += '<div style="grid-column:1 / -1;margin-top:8px"><h3 style="font-family:var(--font-head)">HelloGitHub 月刊精选 · 第 127 期（2026-10-28，月刊，非当日新闻）</h3><p style="color:var(--muted);font-size:14px">以下 5 条来自已核实的 HelloGitHub 月刊最新一期，单独标注，不计入今日 58 条。</p></div>';
+        HG_PICKS.forEach(function (it) {
+          html += '<article class="card" data-hg="1"><div class="meta" style="color:' + color + '"><span class="dot" style="background:' + color + '"></span>月刊精选</div><h3>' + esc(it.title) + "</h3>" + imgTag(it) + "<p>" + esc(it.summary) + '</p><div class="actions"><a href="' + esc(it.url) + '" target="_blank" rel="noreferrer">HelloGitHub 第 127 期 ↗</a><span>来源：' + esc(it.source) + "</span></div></article>";
+        });
+      }
       html += "</div>";
     } else if (state.view.type === "detail") {
       var item = items.find(function (f) { return f.id === state.view.itemId; });
@@ -221,26 +267,40 @@
       var c2 = COLORS[item.category] || "#374151";
       var isCur = items[state.index] && items[state.index].id === item.id;
       var ex = (item.excerpt || "").trim();
+      var searchUrl = "https://www.bing.com/search?q=" + encodeURIComponent(item.title);
       html += '<p style="margin-top:24px;display:flex;gap:16px"><button class="back" id="back-home">← 全部板块</button><button class="back" id="back-cat">← ' + esc(sec ? sec.name : "返回板块") + "</button></p>";
-      html += '<article class="card" style="cursor:default;margin-top:16px"><div class="meta" style="color:' + c2 + ';display:flex;align-items:center;gap:8px;font-size:12px"><span class="dot" style="background:' + c2 + '"></span>' + esc(item.sectionName || item.category) + '<span style="color:var(--muted)">· 来源：' + esc(item.source || "") + " · " + esc(state.date || "") + "</span></div>";
-      html += '<h2 style="font-family:\'Noto Serif SC\',Georgia,serif;font-size:clamp(1.25rem,1.10rem + .75vw,1.5625rem);margin:12px 0 0">' + esc(item.title) + "</h2>";
+      html += '<article class="card" style="cursor:default;margin-top:16px"><div class="meta" style="color:' + c2 + '"><span class="dot" style="background:' + c2 + '"></span>' + esc(item.sectionName || item.category) + '<span style="color:var(--muted)">· 来源：' + esc(item.source || "") + " · " + esc(state.date || "") + "</span></div>";
+      html += '<h2 style="font-family:var(--font-head);font-size:clamp(1.5rem,1.28rem + 1.10vw,2rem);margin:12px 0 0">' + esc(item.title) + "</h2>" + imgTag(item);
       html += '<p style="font-weight:700;color:var(--text);margin-top:16px">' + esc(item.summary || "") + "</p>";
       html += '<div class="detail-excerpt"><div class="label">站内存档导读（来源导读存档，非全文）</div>';
       if (ex && ex.length > 80 && ex !== item.summary) html += "<p>" + esc(ex) + "</p>";
       else html += "<p>本条暂无更长的来源导读存档，以上摘要即为本站存档内容。完整内容请见原文。</p>";
       html += "</div>";
-      html += '<div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:20px;font-size:14px;color:var(--muted)"><button data-play="' + esc(item.id) + '" style="color:var(--accent);background:none;border:none;font-size:14px;cursor:pointer;padding:0;text-decoration:underline">' + (isCur && state.playing ? "暂停播报" : "播报本条") + '</button><a href="' + esc(item.url) + '" target="_blank" rel="noreferrer" style="color:var(--muted)">原文 ↗</a></div></article>';
+      html += '<div class="refs"><div class="label">引用 · 这条新闻的依据与来源</div><ul>';
+      html += '<li>原文链接：<a href="' + esc(item.url) + '" target="_blank" rel="noreferrer">' + esc(item.url) + "</a></li>";
+      html += "<li>来源： " + esc(item.source || "") + "</li>";
+      html += '<li>更多报道检索（按标题检索，不作为证据本身）：<a href="' + esc(searchUrl) + '" target="_blank" rel="noreferrer">以标题检索更多渠道 ↗</a></li>';
+      html += "</ul><p style=\"color:var(--muted);font-size:14px\">今天的数据每条只有一个原文链接和一个来源字符串，本页不编造更多引用；有多个渠道时会在这里逐条列出。</p></div>";
+      html += '<div class="actions" style="margin-top:20px"><button data-play="' + esc(item.id) + '">' + (isCur && state.playing ? "暂停播报" : "播报本条") + '</button><a href="' + esc(item.url) + '" target="_blank" rel="noreferrer">原文 ↗</a></div></article>';
       html += '<p style="display:flex;flex-wrap:wrap;gap:16px;margin-top:24px;font-size:14px"><button class="back" id="prev-card" ' + (prev ? "" : "disabled") + '>← 上一张卡片</button><button class="back" id="next-card" ' + (next ? "" : "disabled") + '>下一张卡片 →</button><span style="color:var(--muted)">' + (pos >= 0 ? (pos + 1) + " / " + sibs.length : "") + "</span></p>";
       html += "<script type=\"application/json\" id=\"detail-nav\">" + JSON.stringify({ prev: prev ? prev.id : null, next: next ? next.id : null, cat: item.category }) + "<\/script>";
     } else {
-      html += '<p style="color:var(--muted);font-size:14px;margin-top:24px">点一张板块卡片进去看这个主题的全部新闻，再点一张新闻卡片看详情。详情页站内存了一份导读，不用每次都跳原文。</p>';
+      html += '<p style="color:var(--muted);font-size:14px;margin-top:24px">一张大卡片就是一个板块，点卡片进板块子页，再点标题进详情子页，详情末尾有引用区。</p>';
       html += '<div class="grid">';
-      sections.forEach(function (s) {
+      // Home order only (user 2026-11-04 20:06): tools first as the
+      // hero card, politics demoted to a normal card, other sections
+      // keep their original order. Playback/flat order is untouched.
+      var homeSections = sections.slice().sort(function (a, b) {
+        if (a.id === "tools") return -1;
+        if (b.id === "tools") return 1;
+        return 0;
+      });
+      homeSections.forEach(function (s, idx) {
         var col = COLORS[s.id] || "#374151";
         var its = s.items || [];
-        html += '<article class="card" data-cat="' + esc(s.id) + '"><div style="display:flex;align-items:center;gap:8px;font-size:12px;color:' + col + '"><span class="dot" style="background:' + col + '"></span>' + esc(s.name) + '<span style="color:var(--muted)">' + its.length + " 条</span></div>";
-        if (its[0]) html += "<h3>" + esc(its[0].title) + "</h3>";
-        if (its[1]) html += "<p>" + esc(its[1].title) + "</p>";
+        html += '<article class="card' + (idx === 0 ? " hero" : "") + '" data-cat="' + esc(s.id) + '"><div class="meta" style="color:' + col + '"><span class="dot" style="background:' + col + '"></span>' + esc(s.name) + '<span style="color:var(--muted)">' + its.length + " 条</span></div>";
+        html += '<h3>' + esc(s.name) + "</h3><p>" + esc(SECTION_DESC[s.id] || "") + "</p>";
+        its.slice(0, 3).forEach(function (it) { html += "<p>· " + esc(it.title) + "</p>"; });
         html += '<div class="go">进入板块 →</div></article>';
       });
       html += "</div>";
@@ -272,7 +332,6 @@
     });
     updateNow();
   }
-
   function updateNow() {
     var items = flat();
     var cur = items[state.index];
@@ -281,8 +340,6 @@
     var nextBtn = document.getElementById("btn-nextday");
     nextBtn.disabled = !state.date || state.date >= beijingDate(0);
   }
-
-  // ---- Speech: sentence chunks, natural voice first, resume from chunk.
   function pickVoice() {
     try {
       var voices = speechSynthesis.getVoices() || [];
@@ -359,7 +416,6 @@
     speak(items[state.index], state.index, state.chunk);
     render();
   }
-
   document.getElementById("btn-play").onclick = togglePlay;
   document.getElementById("btn-prev").onclick = function () { var f = flat(); if (f.length) playAt((state.index - 1 + f.length) % f.length); };
   document.getElementById("btn-next").onclick = function () { var f = flat(); if (f.length) playAt((state.index + 1) % f.length); };
@@ -388,7 +444,6 @@
     if (j) { state.data = j; state.date = j.date || ds; state.index = 0; state.view = { type: "home" }; state.playing = false; stopSpeech(); render(); }
     else showNotice("后一天暂无播报。");
   };
-
   var themeSel = document.getElementById("theme-select");
   try {
     var saved = localStorage.getItem("news-theme");
@@ -398,7 +453,6 @@
     document.body.setAttribute("data-theme", e.target.value);
     try { localStorage.setItem("news-theme", e.target.value); } catch (e2) {}
   };
-
   loadVoices();
   try { speechSynthesis.addEventListener("voiceschanged", loadVoices); } catch (e) {}
   loadLatest();
