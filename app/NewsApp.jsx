@@ -37,11 +37,19 @@ export default function NewsApp({ data }) {
   const [useSpeech, setUseSpeech] = useState(false);
   const [notice, setNotice] = useState("");
   const [rate, setRate] = useState(1.2);
+  const [voices, setVoices] = useState([]);
+  const [voiceName, setVoiceName] = useState("auto");
 
   const audioRef = useRef(null);
   const playingRef = useRef(false);
   const indexRef = useRef(0);
   const speechTimerRef = useRef(null);
+  const speechChunkRef = useRef(0);
+  /* Once an MP3 404s, the whole edition has no recordings (they are
+     generated per edition, not per item on demand). Skip the MP3
+     attempt for the rest of the session and go straight to speech,
+     with a single gentle notice instead of one error per item. */
+  const audioUnavailableRef = useRef(false);
 
   useEffect(() => {
     try {
@@ -61,8 +69,21 @@ export default function NewsApp({ data }) {
   }, [playing, index]);
 
   useEffect(() => {
+    const load = () => {
+      try {
+        const zh = (window.speechSynthesis?.getVoices() || []).filter((v) =>
+          (v.lang || "").toLowerCase().startsWith("zh")
+        );
+        if (zh.length) setVoices(zh);
+      } catch {}
+    };
+    load();
+    try {
+      window.speechSynthesis?.addEventListener("voiceschanged", load);
+    } catch {}
     return () => {
       try {
+        window.speechSynthesis?.removeEventListener("voiceschanged", load);
         window.speechSynthesis?.cancel();
         if (speechTimerRef.current) clearTimeout(speechTimerRef.current);
       } catch {}
@@ -79,8 +100,12 @@ export default function NewsApp({ data }) {
      chunks and between items. MP3 remains preferred when it exists. */
   function pickVoice() {
     try {
-      const voices = window.speechSynthesis.getVoices() || [];
-      const zh = voices.filter((v) => (v.lang || "").toLowerCase().startsWith("zh"));
+      const all = window.speechSynthesis.getVoices() || [];
+      if (voiceName !== "auto") {
+        const chosen = all.find((v) => v.name === voiceName);
+        if (chosen) return chosen;
+      }
+      const zh = all.filter((v) => (v.lang || "").toLowerCase().startsWith("zh"));
       if (!zh.length) return null;
       const score = (v) => {
         const n = (v.name || "").toLowerCase();
@@ -115,7 +140,7 @@ export default function NewsApp({ data }) {
     return chunks.length ? chunks : [text];
   }
 
-  function speak(item, idx) {
+  function speak(item, idx, startChunk = 0) {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) {
       setNotice("此浏览器不支持朗读，请用预生成的 MP3。");
       setPlaying(false);
@@ -126,9 +151,10 @@ export default function NewsApp({ data }) {
       if (speechTimerRef.current) clearTimeout(speechTimerRef.current);
       const chunks = splitSentences(`${item.title}。${item.summary || ""}`);
       const voice = pickVoice();
-      let ci = 0;
+      let ci = startChunk;
       const speakChunk = () => {
         if (!playingRef.current || idx !== indexRef.current) return;
+        speechChunkRef.current = ci;
         if (ci >= chunks.length) {
           if (playingRef.current && idx === indexRef.current) {
             speechTimerRef.current = setTimeout(() => playAt((idx + 1) % flat.length, false), 350);
@@ -171,16 +197,26 @@ export default function NewsApp({ data }) {
       if (speechTimerRef.current) clearTimeout(speechTimerRef.current);
     } catch {}
     const el = audioRef.current;
-    if (!el) {
+    if (!el || audioUnavailableRef.current) {
       setUseSpeech(true);
+      if (audioUnavailableRef.current && !notice) {
+        setNotice("本期暂无预生成音频，已直接走浏览器朗读，不再逐条报错。");
+      }
       speak(item, i);
       return;
     }
-    el.src = item.audio_path || "";
+    // Pages serves the site under /news_reports, so a stored
+    // "/audio/..." path must be prefixed there; locally it stays bare.
+    const base =
+      typeof window !== "undefined" && window.location.pathname.startsWith("/news_reports")
+        ? "/news_reports"
+        : "";
+    el.src = item.audio_path ? base + item.audio_path : "";
     el.playbackRate = rate;
     el.play().catch(() => {
+      audioUnavailableRef.current = true;
       setUseSpeech(true);
-      setNotice("本条暂无预生成音频，已切换为浏览器朗读（按句分段、优选自然女声）。");
+      setNotice("本期暂无预生成音频，已直接走浏览器朗读，不再逐条报错。");
       speak(item, i);
     });
   }
@@ -200,7 +236,8 @@ export default function NewsApp({ data }) {
     if (useSpeech) {
       setPlaying(true);
       playingRef.current = true;
-      speak(current, index);
+      // Resume from the chunk we paused on, not from the item's start.
+      speak(current, index, speechChunkRef.current);
     } else {
       playAt(index);
     }
@@ -218,7 +255,7 @@ export default function NewsApp({ data }) {
   function changeRate(next) {
     setRate(next);
     if (audioRef.current) audioRef.current.playbackRate = next;
-    if (useSpeech && playing && current) speak(current, index);
+    if (useSpeech && playing && current) speak(current, index, speechChunkRef.current);
   }
 
   function onAudioEnded() {
@@ -226,10 +263,16 @@ export default function NewsApp({ data }) {
   }
   function onAudioError() {
     if (current && !useSpeech) {
+      audioUnavailableRef.current = true;
       setUseSpeech(true);
-      setNotice("本条暂无预生成音频，已切换为浏览器朗读（按句分段、优选自然女声）。");
+      setNotice("本期暂无预生成音频，已直接走浏览器朗读，不再逐条报错。");
       speak(current, index);
     }
+  }
+
+  function changeVoice(next) {
+    setVoiceName(next);
+    if (useSpeech && playing && current) speak(current, index, speechChunkRef.current);
   }
 
   const visibleSections = filter === "all" ? sections : sections.filter((s) => s.id === filter);
@@ -319,6 +362,15 @@ export default function NewsApp({ data }) {
             <select id="rate-select" aria-label="播报倍速" value={rate} onChange={(e) => changeRate(Number(e.target.value))} className="ml-1 px-1 py-0.5 rounded border bg-transparent" style={{ borderColor: "var(--border)", color: "var(--text)" }}>
               {[0.75, 1, 1.2, 1.5, 2].map((r) => (
                 <option key={r} value={r}>{r}x</option>
+              ))}
+            </select>
+          </label>
+          <label htmlFor="voice-select" style={{ color: "var(--muted)" }}>
+            音色
+            <select id="voice-select" aria-label="朗读音色" value={voiceName} onChange={(e) => changeVoice(e.target.value)} className="ml-1 px-1 py-0.5 rounded border bg-transparent" style={{ borderColor: "var(--border)", color: "var(--text)", maxWidth: 160 }}>
+              <option value="auto">自动优选</option>
+              {voices.map((v) => (
+                <option key={v.name} value={v.name}>{v.name}</option>
               ))}
             </select>
           </label>
