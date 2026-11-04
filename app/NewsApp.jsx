@@ -2,9 +2,22 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-/* Category colours are kept, but used sparingly after the 2026-11-04
-   redesign: a small dot + label, not a full-colour title or colour block.
-   That keeps categories recognisable without crowding the page. */
+/* Card + sub-page redesign, 2026-11-04 (user feedback):
+   No more one long flat list. Three levels, all inside this site:
+   - Home: one card per theme/category (name, count, top headlines).
+     Click a card -> that category's sub-page.
+   - Category sub-page: one card per news item. Click a card ->
+     that item's detail sub-page. Cards can also be switched with
+     prev/next, and each card still has play + original link.
+   - Detail sub-page: the stored copy for this item lives HERE:
+     title, one-line summary, and the source excerpt (item.excerpt,
+     stored at generation time from the feed, never full text).
+     The original link is still offered, but it is no longer the
+     only way to read more. No full-text scraping, no invented facts:
+     when an excerpt is missing the detail shows the summary only
+     and says so.
+   Category colour stays an accent: dot + label, never a block. */
+
 export const CATEGORY_COLORS = {
   politics: "#B91C1C",
   military: "#14532D",
@@ -23,6 +36,13 @@ const THEMES = [
   { id: "podcast", label: "播客晨报" },
 ];
 
+const cardStyle = {
+  border: "1px solid var(--border)",
+  borderRadius: "var(--radius)",
+  background: "var(--surface)",
+  padding: 20,
+};
+
 export default function NewsApp({ data }) {
   const sections = data?.sections || [];
   const flat = useMemo(
@@ -31,7 +51,7 @@ export default function NewsApp({ data }) {
   );
 
   const [theme, setTheme] = useState("magazine");
-  const [filter, setFilter] = useState("all");
+  const [view, setView] = useState({ type: "home" });
   const [index, setIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [useSpeech, setUseSpeech] = useState(false);
@@ -45,10 +65,6 @@ export default function NewsApp({ data }) {
   const indexRef = useRef(0);
   const speechTimerRef = useRef(null);
   const speechChunkRef = useRef(0);
-  /* Once an MP3 404s, the whole edition has no recordings (they are
-     generated per edition, not per item on demand). Skip the MP3
-     attempt for the rest of the session and go straight to speech,
-     with a single gentle notice instead of one error per item. */
   const audioUnavailableRef = useRef(false);
 
   useEffect(() => {
@@ -62,11 +78,15 @@ export default function NewsApp({ data }) {
       window.localStorage.setItem("news-theme", theme);
     } catch {}
   }, [theme]);
-
   useEffect(() => {
     playingRef.current = playing;
     indexRef.current = index;
   }, [playing, index]);
+  useEffect(() => {
+    try {
+      window.scrollTo(0, 0);
+    } catch {}
+  }, [view]);
 
   useEffect(() => {
     const load = () => {
@@ -91,13 +111,16 @@ export default function NewsApp({ data }) {
   }, []);
 
   const current = flat[index] || null;
+  const detailItem =
+    view.type === "detail" ? flat.find((f) => f.id === view.itemId) || null : null;
+  const detailSection = detailItem
+    ? sections.find((s) => s.id === detailItem.category)
+    : null;
+  const detailSiblings = detailSection ? detailSection.items || [] : [];
+  const detailPos = detailItem
+    ? detailSiblings.findIndex((it) => it.id === detailItem.id)
+    : -1;
 
-  /* Browser speech used to sound stiff because the whole title+summary
-     went out as one long utterance in the browser's default voice.
-     Fix (2026-11-04): pick the most natural zh-CN female voice available
-     (Xiaoxiao / Yunyang / Microsoft natural / Google zh-CN first), split
-     the text into sentence-sized chunks, and leave a short pause between
-     chunks and between items. MP3 remains preferred when it exists. */
   function pickVoice() {
     try {
       const all = window.speechSynthesis.getVoices() || [];
@@ -130,12 +153,10 @@ export default function NewsApp({ data }) {
       .filter(Boolean);
     const chunks = [];
     for (const p of parts) {
-      if (p.length <= 60) {
-        chunks.push(p);
-      } else {
-        // Long sentence: split on commas so no single utterance drags on.
-        for (const c of p.split(/(?<=，)/g).map((s) => s.trim()).filter(Boolean)) chunks.push(c);
-      }
+      if (p.length <= 60) chunks.push(p);
+      else
+        for (const c of p.split(/(?<=，)/g).map((s) => s.trim()).filter(Boolean))
+          chunks.push(c);
     }
     return chunks.length ? chunks : [text];
   }
@@ -156,9 +177,8 @@ export default function NewsApp({ data }) {
         if (!playingRef.current || idx !== indexRef.current) return;
         speechChunkRef.current = ci;
         if (ci >= chunks.length) {
-          if (playingRef.current && idx === indexRef.current) {
+          if (playingRef.current && idx === indexRef.current)
             speechTimerRef.current = setTimeout(() => playAt((idx + 1) % flat.length, false), 350);
-          }
           return;
         }
         const u = new SpeechSynthesisUtterance(chunks[ci]);
@@ -199,14 +219,11 @@ export default function NewsApp({ data }) {
     const el = audioRef.current;
     if (!el || audioUnavailableRef.current) {
       setUseSpeech(true);
-      if (audioUnavailableRef.current && !notice) {
+      if (audioUnavailableRef.current && !notice)
         setNotice("本期暂无预生成音频，已直接走浏览器朗读，不再逐条报错。");
-      }
       speak(item, i);
       return;
     }
-    // Pages serves the site under /news_reports, so a stored
-    // "/audio/..." path must be prefixed there; locally it stays bare.
     const base =
       typeof window !== "undefined" && window.location.pathname.startsWith("/news_reports")
         ? "/news_reports"
@@ -236,7 +253,6 @@ export default function NewsApp({ data }) {
     if (useSpeech) {
       setPlaying(true);
       playingRef.current = true;
-      // Resume from the chunk we paused on, not from the item's start.
       speak(current, index, speechChunkRef.current);
     } else {
       playAt(index);
@@ -275,34 +291,196 @@ export default function NewsApp({ data }) {
     if (useSpeech && playing && current) speak(current, index, speechChunkRef.current);
   }
 
-  const visibleSections = filter === "all" ? sections : sections.filter((s) => s.id === filter);
+  function goDetail(item) {
+    setView({ type: "detail", itemId: item.id });
+  }
+  function flatIndexOf(item) {
+    return flat.findIndex((f) => f.id === item.id);
+  }
 
-  function renderItem(item, isTop) {
-    const color = CATEGORY_COLORS[item.category] || "#374151";
-    const isCurrent = current && current.id === item.id;
+  function renderHome() {
     return (
-      <article key={item.id} className="py-5" style={{ borderTop: "1px solid var(--border)" }}>
-        <div className="flex items-center gap-2 text-xs tracking-wide" style={{ color }}>
-          <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: color }} />
-          {item.sectionName || item.category}
-          {isCurrent && playing ? <span style={{ color: "var(--muted)" }}>· 正在播报</span> : null}
-        </div>
-        <h3 className={`headline mt-2 ${isTop ? "headline-3-top" : "headline-3"}`}>
-          {item.title}
-        </h3>
-        <p className="mt-2 text-[15px] leading-relaxed" style={{ color: "var(--muted)" }}>
-          {item.summary}
+      <main className="mt-8">
+        <p className="text-sm" style={{ color: "var(--muted)" }}>
+          点一张板块卡片进去看这个主题的全部新闻，再点一张新闻卡片看详情。详情页站内存了一份导读，不用每次都跳原文。
         </p>
-        <div className="mt-3 flex flex-wrap items-center gap-4 text-sm" style={{ color: "var(--muted)" }}>
-          <button onClick={() => playAt(flat.findIndex((f) => f.id === item.id))} className="underline underline-offset-4" style={{ color: "var(--accent)" }}>
-            {isCurrent && playing ? "暂停播报" : "播报本条"}
-          </button>
-          <a href={item.url} target="_blank" rel="noreferrer" className="underline underline-offset-4">
-            原文 ↗
-          </a>
-          <span>来源：{item.source}</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+          {sections.map((s) => {
+            const color = CATEGORY_COLORS[s.id] || "#374151";
+            const items = s.items || [];
+            return (
+              <article
+                key={s.id}
+                onClick={() => setView({ type: "category", id: s.id })}
+                className="cursor-pointer"
+                style={cardStyle}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") setView({ type: "category", id: s.id });
+                }}
+              >
+                <div className="flex items-center gap-2 text-xs tracking-wide" style={{ color }}>
+                  <span className="inline-block w-2 h-2 rounded-full" style={{ background: color }} />
+                  {s.name}
+                  <span style={{ color: "var(--muted)" }}>{items.length} 条</span>
+                </div>
+                {items[0] && (
+                  <h3 className="headline headline-3 mt-3">{items[0].title}</h3>
+                )}
+                {items[1] && (
+                  <p className="mt-2 text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
+                    {items[1].title}
+                  </p>
+                )}
+                <div className="mt-4 text-sm font-bold" style={{ color: "var(--accent)" }}>
+                  进入板块 →
+                </div>
+              </article>
+            );
+          })}
         </div>
-      </article>
+      </main>
+    );
+  }
+
+  function renderCategory() {
+    const section = sections.find((s) => s.id === view.id);
+    if (!section) return null;
+    const color = CATEGORY_COLORS[section.id] || "#374151";
+    return (
+      <main className="mt-8">
+        <button onClick={() => setView({ type: "home" })} className="text-sm underline underline-offset-4" style={{ color: "var(--accent)" }}>
+          ← 全部板块
+        </button>
+        <h2 className="headline headline-2 mt-4 flex items-baseline gap-2">
+          <span className="inline-block w-2 h-4 rounded-sm" style={{ background: color }} />
+          {section.name}
+          <span className="text-sm font-normal" style={{ color: "var(--muted)" }}>
+            {(section.items || []).length} 条
+          </span>
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+          {(section.items || []).map((item) => {
+            const isCurrent = current && current.id === item.id;
+            return (
+              <article key={item.id} style={cardStyle}>
+                <div
+                  className="cursor-pointer"
+                  onClick={() => goDetail(item)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") goDetail(item);
+                  }}
+                >
+                  <div className="flex items-center gap-2 text-xs tracking-wide" style={{ color }}>
+                    <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: color }} />
+                    {section.name}
+                    {isCurrent && playing ? <span style={{ color: "var(--muted)" }}>· 正在播报</span> : null}
+                  </div>
+                  <h3 className="headline headline-3 mt-2">{item.title}</h3>
+                  <p className="mt-2 text-[15px] leading-relaxed" style={{ color: "var(--muted)" }}>
+                    {item.summary}
+                  </p>
+                  <div className="mt-3 text-sm font-bold" style={{ color: "var(--accent)" }}>
+                    查看详情 →
+                  </div>
+                </div>
+                <div className="mt-3 flex flex-wrap items-center gap-4 text-sm" style={{ color: "var(--muted)" }}>
+                  <button onClick={() => playAt(flatIndexOf(item))} className="underline underline-offset-4" style={{ color: "var(--accent)" }}>
+                    {isCurrent && playing ? "暂停播报" : "播报本条"}
+                  </button>
+                  <a href={item.url} target="_blank" rel="noreferrer" className="underline underline-offset-4">
+                    原文 ↗
+                  </a>
+                  <span>来源：{item.source}</span>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </main>
+    );
+  }
+
+  function renderDetail() {
+    if (!detailItem) {
+      return (
+        <main className="mt-8">
+          <p style={{ color: "var(--muted)" }}>这条详情找不到了，请回首页。</p>
+          <button onClick={() => setView({ type: "home" })} className="mt-4 underline underline-offset-4" style={{ color: "var(--accent)" }}>
+            ← 回全部板块
+          </button>
+        </main>
+      );
+    }
+    const color = CATEGORY_COLORS[detailItem.category] || "#374151";
+    const excerpt = (detailItem.excerpt || "").trim();
+    const prev = detailPos > 0 ? detailSiblings[detailPos - 1] : null;
+    const next = detailPos >= 0 && detailPos < detailSiblings.length - 1 ? detailSiblings[detailPos + 1] : null;
+    const isCurrent = current && current.id === detailItem.id;
+    return (
+      <main className="mt-8">
+        <div className="flex flex-wrap gap-4 text-sm">
+          <button onClick={() => setView({ type: "home" })} className="underline underline-offset-4" style={{ color: "var(--accent)" }}>
+            ← 全部板块
+          </button>
+          <button onClick={() => setView({ type: "category", id: detailItem.category })} className="underline underline-offset-4" style={{ color: "var(--accent)" }}>
+            ← {detailSection ? detailSection.name : "返回板块"}
+          </button>
+        </div>
+        <article className="mt-6" style={cardStyle}>
+          <div className="flex items-center gap-2 text-xs tracking-wide" style={{ color }}>
+            <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: color }} />
+            {detailItem.sectionName || detailItem.category}
+            <span style={{ color: "var(--muted)" }}>· 来源：{detailItem.source} · {data.date}</span>
+          </div>
+          <h2 className="headline headline-2 mt-3">{detailItem.title}</h2>
+          <p className="mt-4 text-base leading-relaxed font-bold">{detailItem.summary}</p>
+          <div className="mt-6 pt-4" style={{ borderTop: "1px solid var(--border)" }}>
+            <div className="text-xs tracking-wide" style={{ color: "var(--muted)" }}>
+              站内存档导读（来源导读存档，非全文）
+            </div>
+            {excerpt && excerpt.length > 80 && excerpt !== detailItem.summary ? (
+              <p className="mt-3 leading-relaxed" style={{ color: "var(--muted)" }}>{excerpt}</p>
+            ) : (
+              <p className="mt-3 leading-relaxed" style={{ color: "var(--muted)" }}>
+                本条暂无更长的来源导读存档，以上摘要即为本站存档内容。完整内容请见原文。
+              </p>
+            )}
+          </div>
+          <div className="mt-6 flex flex-wrap items-center gap-4 text-sm" style={{ color: "var(--muted)" }}>
+            <button onClick={() => playAt(flatIndexOf(detailItem))} className="underline underline-offset-4" style={{ color: "var(--accent)" }}>
+              {isCurrent && playing ? "暂停播报" : "播报本条"}
+            </button>
+            <a href={detailItem.url} target="_blank" rel="noreferrer" className="underline underline-offset-4">
+              原文 ↗
+            </a>
+          </div>
+        </article>
+        <div className="mt-6 flex flex-wrap gap-4 text-sm">
+          <button
+            disabled={!prev}
+            onClick={() => prev && goDetail(prev)}
+            className="underline underline-offset-4 disabled:no-underline"
+            style={{ color: prev ? "var(--accent)" : "var(--muted)" }}
+          >
+            ← 上一张卡片
+          </button>
+          <button
+            disabled={!next}
+            onClick={() => next && goDetail(next)}
+            className="underline underline-offset-4 disabled:no-underline"
+            style={{ color: next ? "var(--accent)" : "var(--muted)" }}
+          >
+            下一张卡片 →
+          </button>
+          <span style={{ color: "var(--muted)" }}>
+            {detailPos >= 0 ? `${detailPos + 1} / ${detailSiblings.length}` : ""}
+          </span>
+        </div>
+      </main>
     );
   }
 
@@ -310,7 +488,6 @@ export default function NewsApp({ data }) {
     <div data-theme={theme} style={{ background: "var(--bg)", color: "var(--text)" }} className="min-h-screen">
       <audio ref={audioRef} onEnded={onAudioEnded} onError={onAudioError} preload="none" />
       <div className="mx-auto px-5 py-6" style={{ maxWidth: 760 }}>
-        {/* Top bar: brand left, theme dropdown top-right, small. */}
         <header className="flex items-start justify-between gap-4 pb-5" style={{ borderBottom: "1px solid var(--border)" }}>
           <div>
             <div className="text-xs tracking-widest" style={{ color: "var(--muted)" }}>
@@ -347,7 +524,6 @@ export default function NewsApp({ data }) {
           </p>
         )}
 
-        {/* Compact player: one quiet row, not a large sticky panel. */}
         <section className="mt-5 flex flex-wrap items-center gap-3 text-sm" style={{ borderBottom: "1px solid var(--border)" }}>
           <strong className="text-sm">🎧 今日播报</strong>
           <button aria-label="上一条" onClick={() => flat.length && playAt((index - 1 + flat.length) % flat.length)}>⏮ 上一条</button>
@@ -381,37 +557,12 @@ export default function NewsApp({ data }) {
         </section>
         {notice && <p className="mt-2 text-sm" style={{ color: "var(--muted)" }}>{notice}</p>}
 
-        {/* Category filter: plain text links, not a row of buttons. */}
-        <nav aria-label="按分类筛选" className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-sm">
-          <button onClick={() => setFilter("all")} style={{ color: filter === "all" ? "var(--accent)" : "var(--muted)", fontWeight: filter === "all" ? 700 : 400 }}>
-            全部
-          </button>
-          {sections.map((s) => (
-            <button key={s.id} onClick={() => setFilter(s.id)} style={{ color: filter === s.id ? CATEGORY_COLORS[s.id] : "var(--muted)", fontWeight: filter === s.id ? 700 : 400 }}>
-              {s.name}
-            </button>
-          ))}
-        </nav>
-
-        <main className="mt-8 space-y-10">
-          {visibleSections.map((section) => (
-            <section key={section.id}>
-              <h2 className="headline headline-2 flex items-baseline gap-2">
-                <span className="inline-block w-2 h-4 rounded-sm" style={{ background: CATEGORY_COLORS[section.id] }} />
-                {section.name}
-                <span className="text-sm font-normal" style={{ color: "var(--muted)" }}>
-                  {section.items?.length || 0} 条
-                </span>
-              </h2>
-              <div className="mt-1">
-                {section.items.map((item, i) => renderItem({ ...item, sectionName: section.name }, i === 0 && section.id === sections[0]?.id))}
-              </div>
-            </section>
-          ))}
-        </main>
+        {view.type === "home" && renderHome()}
+        {view.type === "category" && renderCategory()}
+        {view.type === "detail" && renderDetail()}
 
         <footer className="mt-12 pt-5 text-xs text-center" style={{ borderTop: "1px solid var(--border)", color: "var(--muted)" }}>
-          只展示标题、摘要与原文链接，不全文搬运；图片优先用原文配图，AI 图须标注。
+          详情页为来源导读存档，不全文搬运；完整内容请见原文链接。
         </footer>
       </div>
     </div>
