@@ -135,18 +135,39 @@ async def _edge_tts_save(text: str, out_path: Path, voice: str = "zh-CN-Xiaoxiao
     await communicate.save(str(out_path))
 
 
-def generate_audio(payload, audio_root: Path):
-    """Generate one Edge-TTS MP3 per item (female voice, normal rate).
+def _gtts_save(text: str, out_path: Path):
+    """Google TTS fallback. Verified 2026-11-04 from this VM: Edge-TTS
+    fails with an SSL WRONG_VERSION_NUMBER to speech.platform.bing.com
+    (direct and via proxy alike), while gTTS reaches Google and writes
+    a real MP3. Voice is Google's zh-CN voice, not Xiaoxiao, but it is
+    a real file the player can play at 1.2x -- far less stiff than
+    browser speech synthesis, which stays as the last resort."""
+    from gtts import gTTS
+    gTTS(text, lang="zh-CN").save(str(out_path))
 
-    The web player applies the user's chosen default 1.2x playback rate,
-    so files are generated at normal rate -- do NOT also add +20% here,
-    or the effective speed would become ~1.44x. Failures are warned
-    and skipped per item; the player then falls back to browser speech.
+
+def generate_audio(payload, audio_root: Path):
+    """Generate one MP3 per item (female voice, normal rate).
+
+    Order: Edge-TTS (zh-CN-XiaoxiaoNeural) first, gTTS second, browser
+    speech last (player-side). The web player applies the user's chosen
+    default 1.2x playback rate, so files are generated at normal rate --
+    do NOT also add +20% here, or the effective speed would become
+    ~1.44x. Failures are warned per item and the empty/partial file is
+    deleted; the player then falls back to browser speech.
     """
+    have_edge = True
     try:
         import edge_tts  # noqa: F401
     except ImportError:
-        print("WARNING: edge-tts not installed; audio step skipped. "
+        have_edge = False
+    have_gtts = True
+    try:
+        import gtts  # noqa: F401
+    except ImportError:
+        have_gtts = False
+    if not have_edge and not have_gtts:
+        print("WARNING: neither edge-tts nor gtts installed; audio step skipped. "
               "Install: pip install -r scripts/requirements.txt", file=sys.stderr)
         return 0
     count = 0
@@ -158,17 +179,33 @@ def generate_audio(payload, audio_root: Path):
                 continue
             out_path = audio_root / payload["date"] / f"{it['id']}.mp3"
             out_path.parent.mkdir(parents=True, exist_ok=True)
-            try:
-                asyncio.run(_edge_tts_save(text, out_path))
-                if out_path.stat().st_size == 0:
-                    raise RuntimeError("Edge-TTS produced an empty file")
-                count += 1
-            except Exception as exc:  # noqa: BLE001
-                print(f"WARNING: Edge-TTS failed for {it['id']}: {exc}", file=sys.stderr)
+            made = False
+            if have_edge:
                 try:
-                    out_path.unlink(missing_ok=True)
-                except OSError:
-                    pass
+                    asyncio.run(_edge_tts_save(text, out_path))
+                    if out_path.stat().st_size == 0:
+                        raise RuntimeError("Edge-TTS produced an empty file")
+                    made = True
+                except Exception as exc:  # noqa: BLE001
+                    print(f"WARNING: Edge-TTS failed for {it['id']}, trying gTTS: {exc}", file=sys.stderr)
+                    try:
+                        out_path.unlink(missing_ok=True)
+                    except OSError:
+                        pass
+            if not made and have_gtts:
+                try:
+                    _gtts_save(text, out_path)
+                    if out_path.stat().st_size == 0:
+                        raise RuntimeError("gTTS produced an empty file")
+                    made = True
+                except Exception as exc:  # noqa: BLE001
+                    print(f"WARNING: gTTS failed for {it['id']}: {exc}", file=sys.stderr)
+                    try:
+                        out_path.unlink(missing_ok=True)
+                    except OSError:
+                        pass
+            if made:
+                count += 1
     return count
 
 
