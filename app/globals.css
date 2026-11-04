@@ -2,26 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Refactor 2026-11-04 v2 — zeroone/frontend-ui skill (2026):
-   - Two-tier tokens: primitives in OKLCH, semantic tokens on top.
-     OKLCH is perceptually uniform, so dark mode flips the L axis
-     instead of hand-tuning every colour.
-   - Fluid type scale with clamp(): no breakpoint jumps.
-   - 8px spacing grid: 4 / 8 / 12 / 16 / 24 / 32 / 48 / 64.
-   - WCAG 2.2 AA: visible focus, sufficient contrast, semantic HTML
-     (applied in NewsApp.jsx), reduced-motion support.
-   - Category colour stays an accent only: dot + label, never a block.
-   - Skeleton class for loading states (mini-program + any async list). */
+/* Website v2, 2026-11-04 — synced from local mini.html v2 so the site
+   matches the mini page. The 5 themes are deliberately different
+   layouts, not just colours:
+   - magazine: warm off-white, serif headings, staggered 2-col grid
+     with a full-width hero card, fade-slide entrance.
+   - newspaper: near-black hairlines, square corners and square dots,
+     small-caps kickers, serif body, one column, no animation.
+   - dark: #0d1117, monospace headings AND body, blue glow shadow,
+     slide-in entrance.
+   - light-card: radius 20px, soft shadow, spring hover lift.
+   - podcast: orange, vertical timeline (accent left border on the
+     grid), player framed as a prominent bordered panel.
+   Tokens stay two-tier (primitives -> semantic vars); fluid type
+   with clamp(); WCAG 2.2 visible focus; prefers-reduced-motion.
+   Category colour stays an accent only: dot + label, never a block.
+   Theme switch stays a small dropdown at the top-right (NewsApp). */
 
 :root {
   color-scheme: light;
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-6: 24px;
-  --space-8: 32px;
-  --space-12: 48px;
   --text-xs: clamp(0.75rem, 0.70rem + 0.25vw, 0.8125rem);
   --text-sm: clamp(0.875rem, 0.82rem + 0.28vw, 0.9375rem);
   --text-base: clamp(1rem, 0.93rem + 0.38vw, 1.125rem);
@@ -31,102 +30,403 @@
   --text-3xl: clamp(1.875rem, 1.50rem + 1.88vw, 2.5rem);
   --radius-sm: 6px;
   --radius-md: 12px;
+  /* Default = magazine, so the page also reads correctly before the
+     theme attribute hydrates. */
+  --bg: #faf6ef;
+  --surface: #fffdf8;
+  --text: #26221c;
+  --muted: #7a7264;
+  --border: #e5ddcc;
+  --accent: #b91c1c;
+  --font-head: "Noto Serif SC", Georgia, serif;
+  --font-body: system-ui, -apple-system, "PingFang SC", "Noto Sans SC", sans-serif;
+  --radius: 16px;
+  --shadow: none;
 }
 
 /* Magazine — warm editorial default. */
 [data-theme="magazine"] {
-  --bg: oklch(0.98 0.012 85);
-  --surface: oklch(1 0 0);
-  --text: oklch(0.24 0.008 60);
-  --muted: oklch(0.52 0.012 60);
-  --border: oklch(0.90 0.012 85);
-  --accent: oklch(0.48 0.18 25);
-  --radius: var(--radius-md);
+  --bg: #faf6ef;
+  --surface: #fffdf8;
+  --text: #26221c;
+  --muted: #7a7264;
+  --border: #e5ddcc;
+  --accent: #b91c1c;
   --font-head: "Noto Serif SC", Georgia, serif;
+  --font-body: system-ui, -apple-system, "PingFang SC", "Noto Sans SC", sans-serif;
+  --radius: 16px;
+  --shadow: none;
 }
-/* Newspaper — ink on paper, sharp corners. */
+/* Newspaper — ink on paper, sharp corners, serif everywhere. */
 [data-theme="newspaper"] {
-  --bg: oklch(0.99 0.004 90);
-  --surface: oklch(1 0 0);
-  --text: oklch(0.16 0 0);
-  --muted: oklch(0.42 0 0);
-  --border: oklch(0.86 0.008 90);
-  --accent: oklch(0.16 0 0);
-  --radius: 2px;
-  --font-head: "Noto Serif SC", Georgia, serif;
+  --bg: #fdfdf8;
+  --surface: #ffffff;
+  --text: #111111;
+  --muted: #555555;
+  --border: #111111;
+  --accent: #111111;
+  --font-head: Georgia, "Noto Serif SC", serif;
+  --font-body: Georgia, "Noto Serif SC", serif;
+  --radius: 0px;
+  --shadow: none;
 }
-/* Dark — flip the L axis, keep accents bright. */
+/* Dark — monospace, glow. */
 [data-theme="dark"] {
   color-scheme: dark;
-  --bg: oklch(0.20 0.02 260);
-  --surface: oklch(0.26 0.03 260);
-  --text: oklch(0.92 0.01 260);
-  --muted: oklch(0.70 0.02 260);
-  --border: oklch(0.32 0.03 260);
-  --accent: oklch(0.82 0.10 230);
-  --radius: var(--radius-md);
-  --font-head: ui-sans-system, system-ui, sans-serif;
+  --bg: #0d1117;
+  --surface: #161b22;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --border: #30363d;
+  --accent: #58a6ff;
+  --font-head: ui-monospace, "SF Mono", Menlo, monospace;
+  --font-body: ui-monospace, "SF Mono", Menlo, monospace;
+  --radius: 8px;
+  --shadow: 0 0 24px rgba(88, 166, 255, 0.15);
 }
-/* Light card — cool neutral. */
+/* Light card — rounded, soft shadow, spring lift. */
 [data-theme="light-card"] {
-  --bg: oklch(0.97 0.004 260);
-  --surface: oklch(1 0 0);
-  --text: oklch(0.25 0.02 260);
-  --muted: oklch(0.52 0.01 260);
-  --border: oklch(0.91 0.006 260);
-  --accent: oklch(0.48 0.20 260);
-  --radius: var(--radius-md);
-  --font-head: ui-sans-system, system-ui, sans-serif;
+  --bg: #f0f4f8;
+  --surface: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --accent: #7c3aed;
+  --font-head: system-ui, -apple-system, "PingFang SC", sans-serif;
+  --font-body: system-ui, -apple-system, "PingFang SC", sans-serif;
+  --radius: 20px;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
-/* Podcast — warm amber, morning feel. */
+/* Podcast — warm orange timeline. */
 [data-theme="podcast"] {
-  --bg: oklch(0.97 0.03 85);
-  --surface: oklch(1 0 0);
-  --text: oklch(0.25 0.02 260);
-  --muted: oklch(0.52 0.01 260);
-  --border: oklch(0.89 0.04 85);
-  --accent: oklch(0.58 0.18 50);
-  --radius: var(--radius-md);
-  --font-head: ui-sans-system, system-ui, sans-serif;
+  --bg: #fff7ed;
+  --surface: #ffffff;
+  --text: #292524;
+  --muted: #78716c;
+  --border: #fed7aa;
+  --accent: #ea580c;
+  --font-head: system-ui, -apple-system, "PingFang SC", sans-serif;
+  --font-body: system-ui, -apple-system, "PingFang SC", sans-serif;
+  --radius: 12px;
+  --shadow: none;
 }
 
 body {
   background: var(--bg);
   color: var(--text);
   line-height: 1.7;
+  font-family: var(--font-body);
   font-size: var(--text-base);
 }
 
+.muted-text { color: var(--muted); }
 .headline { font-family: var(--font-head); line-height: 1.25; }
 .headline-1 { font-size: var(--text-3xl); font-weight: 700; }
 .headline-2 { font-size: var(--text-xl); font-weight: 700; }
 .headline-3 { font-size: var(--text-lg); font-weight: 700; line-height: 1.4; }
-.headline-3-top { font-size: var(--text-2xl); font-weight: 700; line-height: 1.3; }
+
+.site-header { border-bottom: 1px solid var(--border); }
+.site-footer { border-top: 1px solid var(--border); }
+.kicker {
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+[data-theme="newspaper"] .kicker {
+  letter-spacing: 0.22em;
+}
+.theme-select {
+  border-color: var(--border);
+  color: var(--text);
+}
+
+/* Player: one compact row everywhere, except podcast where it is a
+   prominent framed panel (mirrors mini.html v2). */
+.player {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 20px;
+}
+.player button {
+  background: none;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  padding: 4px 2px;
+}
+.player .player-primary { color: var(--accent); }
+.player select {
+  border-color: var(--border);
+  color: var(--text);
+}
+[data-theme="podcast"] .player {
+  background: var(--surface);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-top: 16px;
+}
+
+/* Shared card grid (home + category). Column rules differ by theme:
+   magazine / dark / light-card stagger into 2 columns on wider
+   screens; newspaper and podcast stay one column. */
+.home-main { margin-top: 32px; }
+.home-intro {
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: 24px;
+}
+.grid-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  margin-top: 20px;
+}
+@media (min-width: 560px) {
+  [data-theme="magazine"] .grid-layout,
+  [data-theme="dark"] .grid-layout,
+  [data-theme="light-card"] .grid-layout {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+[data-theme="podcast"] .grid-layout {
+  border-left: 3px solid var(--accent);
+  padding-left: 20px;
+  margin-left: 8px;
+}
+
+.home-card,
+.cat-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 24px;
+  box-shadow: var(--shadow);
+  animation: cardIn 0.45s ease both;
+}
+.home-card { cursor: pointer; }
+.home-card.hero { grid-column: 1 / -1; }
+.home-card.hero h3 {
+  font-size: clamp(1.5rem, 1.28rem + 1.10vw, 2rem);
+}
+[data-theme="magazine"] .home-card,
+[data-theme="magazine"] .cat-card { animation-name: fadeSlide; }
+[data-theme="dark"] .home-card,
+[data-theme="dark"] .cat-card { animation-name: slideIn; }
+[data-theme="light-card"] .home-card,
+[data-theme="light-card"] .cat-card {
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.35s;
+}
+[data-theme="light-card"] .home-card:hover,
+[data-theme="light-card"] .cat-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
+}
+[data-theme="newspaper"] .home-card,
+[data-theme="newspaper"] .cat-card {
+  animation: none;
+  border-width: 1px 1px 3px 1px;
+}
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-16px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes cardIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.home-card h3,
+.cat-card h3 {
+  font-family: var(--font-head);
+  font-size: var(--text-lg);
+  line-height: 1.4;
+  margin: 8px 0 0;
+}
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+}
+[data-theme="newspaper"] .meta {
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.meta .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+[data-theme="newspaper"] .meta .dot { border-radius: 0; }
+.meta-count { color: var(--muted); }
+.sec-desc {
+  color: var(--muted);
+  font-size: 15px;
+  margin: 8px 0 0;
+}
+.top-headline {
+  color: var(--muted);
+  font-size: 15px;
+  margin: 8px 0 0;
+}
+.go {
+  margin-top: 14px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.card-click { cursor: pointer; }
+.card-summary {
+  margin-top: 8px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+.card-img {
+  width: 100%;
+  border-radius: calc(var(--radius) - 4px);
+  margin-top: 12px;
+  display: block;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 12px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.action-link {
+  color: var(--accent);
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.action-muted {
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.back-link {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.back-link:disabled {
+  color: var(--muted);
+  text-decoration: none;
+  cursor: default;
+}
+.section-title {
+  margin-top: 16px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.section-count {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--muted);
+}
+.hg-head { grid-column: 1 / -1; margin-top: 8px; }
+.hg-head h3 {
+  font-family: var(--font-head);
+  font-size: var(--text-lg);
+}
+.hg-head p {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Detail page. */
+.detail-back-row {
+  margin-top: 24px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.detail-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 24px;
+  box-shadow: var(--shadow);
+  margin-top: 16px;
+}
+.detail-title { margin: 12px 0 0; }
+.detail-summary {
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 16px;
+  line-height: 1.7;
+}
+.detail-excerpt {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.detail-excerpt p {
+  color: var(--muted);
+  margin-top: 12px;
+}
+.refs {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.block-label {
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.refs ul {
+  margin: 12px 0 0;
+  padding-left: 20px;
+  color: var(--muted);
+  font-size: 15px;
+}
+.refs a {
+  color: var(--accent);
+  word-break: break-all;
+}
+.refs-note {
+  color: var(--muted);
+  font-size: 14px;
+  margin-top: 12px;
+}
+.detail-nav-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 24px;
+  font-size: 14px;
+  align-items: center;
+}
 
 /* WCAG 2.2: focus must always be visible, never rely on colour alone. */
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
-}
-
-/* Skeleton loading state (skill UX pattern): shimmer, not a spinner. */
-.skeleton {
-  position: relative;
-  overflow: hidden;
-  background: var(--border);
-  border-radius: var(--radius-sm);
-}
-.skeleton::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
-  animation: skeleton-shimmer 1.5s infinite;
-}
-@keyframes skeleton-shimmer {
-  to { transform: translateX(100%); }
 }
 
 @media (prefers-reduced-motion: reduce) {
