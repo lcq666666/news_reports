@@ -3,3 +3,4 @@
 feedparser>=6.0.0
 requests>=2.31.0
 edge-tts>=7.0.0
+gtts>=2.5.0  # fallback when Edge-TTS SSL path fails (verified 2026-11-04)
