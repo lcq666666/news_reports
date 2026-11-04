@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Theme variables. Category colours are defined in app/NewsApp.jsx and
+   stay the same across themes so a category is recognisable in any theme. */
+:root { color-scheme: light; }
+[data-theme="magazine"] {
+  --bg: #faf7f2; --surface: #ffffff; --text: #1a1a1a; --muted: #6b7280;
+  --border: #e5e0d8; --accent: #b91c1c; --radius: 18px;
+  --font-head: "Noto Serif SC", Georgia, serif;
+}
+[data-theme="newspaper"] {
+  --bg: #fdfbf7; --surface: #ffffff; --text: #111111; --muted: #555555;
+  --border: #111111; --accent: #b91c1c; --radius: 2px;
+  --font-head: "Noto Serif SC", Georgia, serif;
+}
+[data-theme="dark"] {
+  --bg: #0b1220; --surface: #111a2e; --text: #e5e7eb; --muted: #94a3b8;
+  --border: #1e293b; --accent: #22d3ee; --radius: 14px;
+  --font-head: ui-sans-system, system-ui, sans-serif;
+}
+[data-theme="light-card"] {
+  --bg: #f3f5f7; --surface: #ffffff; --text: #1f2937; --muted: #6b7280;
+  --border: #e5e7eb; --accent: #2563eb; --radius: 20px;
+  --font-head: ui-sans-system, system-ui, sans-serif;
+}
+[data-theme="podcast"] {
+  --bg: #fff8ec; --surface: #ffffff; --text: #1f2937; --muted: #6b7280;
+  --border: #f0d9a8; --accent: #ea580c; --radius: 16px;
+  --font-head: ui-sans-system, system-ui, sans-serif;
+}
+body { background: var(--bg); color: var(--text); }
+.headline { font-family: var(--font-head); }
