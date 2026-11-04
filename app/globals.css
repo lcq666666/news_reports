@@ -2,33 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Theme variables. Category colours are defined in app/NewsApp.jsx and
-   stay the same across themes so a category is recognisable in any theme. */
+/* Redesign 2026-11-04: editorial restraint.
+   Neutral foundations, hairline rules, no shadows, no gradients.
+   Category colour is an accent only (dot + label in NewsApp.jsx). */
 :root { color-scheme: light; }
 [data-theme="magazine"] {
-  --bg: #faf7f2; --surface: #ffffff; --text: #1a1a1a; --muted: #6b7280;
-  --border: #e5e0d8; --accent: #b91c1c; --radius: 18px;
+  --bg: #faf7f1; --surface: #ffffff; --text: #1a1917; --muted: #6b6560;
+  --border: #e5ddd5; --accent: #b91c1c; --radius: 12px;
   --font-head: "Noto Serif SC", Georgia, serif;
 }
 [data-theme="newspaper"] {
   --bg: #fdfbf7; --surface: #ffffff; --text: #111111; --muted: #555555;
-  --border: #111111; --accent: #b91c1c; --radius: 2px;
+  --border: #d8d2c4; --accent: #111111; --radius: 2px;
   --font-head: "Noto Serif SC", Georgia, serif;
 }
 [data-theme="dark"] {
-  --bg: #0b1220; --surface: #111a2e; --text: #e5e7eb; --muted: #94a3b8;
-  --border: #1e293b; --accent: #22d3ee; --radius: 14px;
+  --bg: #0b0f1a; --surface: #111a2e; --text: #e6eaf0; --muted: #94a3b8;
+  --border: #1e293b; --accent: #7dd3fc; --radius: 12px;
   --font-head: ui-sans-system, system-ui, sans-serif;
 }
 [data-theme="light-card"] {
-  --bg: #f3f5f7; --surface: #ffffff; --text: #1f2937; --muted: #6b7280;
-  --border: #e5e7eb; --accent: #2563eb; --radius: 20px;
+  --bg: #f7f8fa; --surface: #ffffff; --text: #1f2937; --muted: #6b7280;
+  --border: #e5e7eb; --accent: #2563eb; --radius: 12px;
   --font-head: ui-sans-system, system-ui, sans-serif;
 }
 [data-theme="podcast"] {
   --bg: #fff8ec; --surface: #ffffff; --text: #1f2937; --muted: #6b7280;
-  --border: #f0d9a8; --accent: #ea580c; --radius: 16px;
+  --border: #f0d9a8; --accent: #ea580c; --radius: 12px;
   --font-head: ui-sans-system, system-ui, sans-serif;
 }
-body { background: var(--bg); color: var(--text); }
-.headline { font-family: var(--font-head); }
+body { background: var(--bg); color: var(--text); line-height: 1.7; }
+.headline { font-family: var(--font-head); line-height: 1.25; }
