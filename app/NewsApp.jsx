@@ -41,6 +41,7 @@ export default function NewsApp({ data }) {
   const audioRef = useRef(null);
   const playingRef = useRef(false);
   const indexRef = useRef(0);
+  const speechTimerRef = useRef(null);
 
   useEffect(() => {
     try {
@@ -63,29 +64,95 @@ export default function NewsApp({ data }) {
     return () => {
       try {
         window.speechSynthesis?.cancel();
+        if (speechTimerRef.current) clearTimeout(speechTimerRef.current);
       } catch {}
     };
   }, []);
 
   const current = flat[index] || null;
 
+  /* Browser speech used to sound stiff because the whole title+summary
+     went out as one long utterance in the browser's default voice.
+     Fix (2026-11-04): pick the most natural zh-CN female voice available
+     (Xiaoxiao / Yunyang / Microsoft natural / Google zh-CN first), split
+     the text into sentence-sized chunks, and leave a short pause between
+     chunks and between items. MP3 remains preferred when it exists. */
+  function pickVoice() {
+    try {
+      const voices = window.speechSynthesis.getVoices() || [];
+      const zh = voices.filter((v) => (v.lang || "").toLowerCase().startsWith("zh"));
+      if (!zh.length) return null;
+      const score = (v) => {
+        const n = (v.name || "").toLowerCase();
+        if (n.includes("xiaoxiao")) return 100;
+        if (n.includes("yunyang") || n.includes("yunxia")) return 90;
+        if (n.includes("natural") || n.includes("neural")) return 80;
+        if (n.includes("google")) return 70;
+        if (n.includes("microsoft")) return 60;
+        if (n.includes("ting") || n.includes("yao") || n.includes("mei")) return 50;
+        return 10;
+      };
+      return [...zh].sort((a, b) => score(b) - score(a))[0];
+    } catch {
+      return null;
+    }
+  }
+
+  function splitSentences(text) {
+    const parts = (text || "")
+      .split(/(?<=[。！？；])/g)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const chunks = [];
+    for (const p of parts) {
+      if (p.length <= 60) {
+        chunks.push(p);
+      } else {
+        // Long sentence: split on commas so no single utterance drags on.
+        for (const c of p.split(/(?<=，)/g).map((s) => s.trim()).filter(Boolean)) chunks.push(c);
+      }
+    }
+    return chunks.length ? chunks : [text];
+  }
+
   function speak(item, idx) {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) {
-      setNotice("此浏览器不支持朗读兜底，正式版请使用预生成的 MP3。");
+      setNotice("此浏览器不支持朗读，请用预生成的 MP3。");
       setPlaying(false);
       return;
     }
     try {
       window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(`${item.title}。${item.summary || ""}`);
-      u.lang = "zh-CN";
-      u.rate = rate;
-      u.onend = () => {
-        if (playingRef.current && idx === indexRef.current) playAt((idx + 1) % flat.length, false);
+      if (speechTimerRef.current) clearTimeout(speechTimerRef.current);
+      const chunks = splitSentences(`${item.title}。${item.summary || ""}`);
+      const voice = pickVoice();
+      let ci = 0;
+      const speakChunk = () => {
+        if (!playingRef.current || idx !== indexRef.current) return;
+        if (ci >= chunks.length) {
+          if (playingRef.current && idx === indexRef.current) {
+            speechTimerRef.current = setTimeout(() => playAt((idx + 1) % flat.length, false), 350);
+          }
+          return;
+        }
+        const u = new SpeechSynthesisUtterance(chunks[ci]);
+        u.lang = "zh-CN";
+        u.rate = rate;
+        u.pitch = 1.0;
+        if (voice) u.voice = voice;
+        u.onend = () => {
+          ci += 1;
+          speechTimerRef.current = setTimeout(speakChunk, 180);
+        };
+        u.onerror = () => {
+          ci += 1;
+          speechTimerRef.current = setTimeout(speakChunk, 180);
+        };
+        window.speechSynthesis.speak(u);
       };
-      window.speechSynthesis.speak(u);
+      speakChunk();
     } catch {
-      setNotice("浏览器朗读失败，正式版请使用预生成的 MP3。");
+      setNotice("浏览器朗读失败，请用预生成的 MP3。");
       setPlaying(false);
     }
   }
@@ -101,6 +168,7 @@ export default function NewsApp({ data }) {
     indexRef.current = i;
     try {
       window.speechSynthesis?.cancel();
+      if (speechTimerRef.current) clearTimeout(speechTimerRef.current);
     } catch {}
     const el = audioRef.current;
     if (!el) {
@@ -112,7 +180,7 @@ export default function NewsApp({ data }) {
     el.playbackRate = rate;
     el.play().catch(() => {
       setUseSpeech(true);
-      setNotice("音频文件暂不可用，已切换为浏览器朗读兜底。");
+      setNotice("本条暂无预生成音频，已切换为浏览器朗读（按句分段、优选自然女声）。");
       speak(item, i);
     });
   }
@@ -123,6 +191,7 @@ export default function NewsApp({ data }) {
       try {
         audioRef.current?.pause();
         window.speechSynthesis?.cancel();
+        if (speechTimerRef.current) clearTimeout(speechTimerRef.current);
       } catch {}
       setPlaying(false);
       playingRef.current = false;
@@ -158,7 +227,7 @@ export default function NewsApp({ data }) {
   function onAudioError() {
     if (current && !useSpeech) {
       setUseSpeech(true);
-      setNotice("音频文件暂不可用，已切换为浏览器朗读兜底。");
+      setNotice("本条暂无预生成音频，已切换为浏览器朗读（按句分段、优选自然女声）。");
       speak(current, index);
     }
   }
@@ -175,7 +244,7 @@ export default function NewsApp({ data }) {
           {item.sectionName || item.category}
           {isCurrent && playing ? <span style={{ color: "var(--muted)" }}>· 正在播报</span> : null}
         </div>
-        <h3 className={`headline font-bold mt-2 leading-snug ${isTop ? "text-2xl" : "text-lg"}`}>
+        <h3 className={`headline mt-2 ${isTop ? "headline-3-top" : "headline-3"}`}>
           {item.title}
         </h3>
         <p className="mt-2 text-[15px] leading-relaxed" style={{ color: "var(--muted)" }}>
@@ -204,14 +273,16 @@ export default function NewsApp({ data }) {
             <div className="text-xs tracking-widest" style={{ color: "var(--muted)" }}>
               NEWS_REPORTS · 每日 07:30 更新
             </div>
-            <h1 className="headline text-3xl font-bold mt-2">每日新闻播报</h1>
+            <h1 className="headline headline-1 mt-2">每日新闻播报</h1>
             <p className="mt-1 text-sm" style={{ color: "var(--muted)" }}>
               {data.date} · 政治 / 军事 / 时事 / 科研 / 大模型 / 人工智能 / 今日值得一试
             </p>
           </div>
-          <label className="shrink-0 text-xs" style={{ color: "var(--muted)" }}>
+          <label htmlFor="theme-select" className="shrink-0 text-xs" style={{ color: "var(--muted)" }}>
             主题
             <select
+              id="theme-select"
+              aria-label="切换主题"
               value={theme}
               onChange={(e) => setTheme(e.target.value)}
               className="ml-2 px-2 py-1.5 rounded-md border bg-transparent text-sm"
@@ -236,16 +307,16 @@ export default function NewsApp({ data }) {
         {/* Compact player: one quiet row, not a large sticky panel. */}
         <section className="mt-5 flex flex-wrap items-center gap-3 text-sm" style={{ borderBottom: "1px solid var(--border)" }}>
           <strong className="text-sm">🎧 今日播报</strong>
-          <button onClick={() => flat.length && playAt((index - 1 + flat.length) % flat.length)}>⏮ 上一条</button>
-          <button onClick={togglePlay} style={{ color: "var(--accent)" }} className="font-bold">
+          <button aria-label="上一条" onClick={() => flat.length && playAt((index - 1 + flat.length) % flat.length)}>⏮ 上一条</button>
+          <button aria-label={playing ? "暂停播报" : "播放全部"} onClick={togglePlay} style={{ color: "var(--accent)" }} className="font-bold">
             {playing ? "⏸ 暂停" : "▶ 播放全部"}
           </button>
-          <button onClick={() => flat.length && playAt((index + 1) % flat.length)}>下一条 ⏭</button>
-          <button onClick={() => skip(-15)}>−15s</button>
-          <button onClick={() => skip(15)}>+15s</button>
-          <label style={{ color: "var(--muted)" }}>
+          <button aria-label="下一条" onClick={() => flat.length && playAt((index + 1) % flat.length)}>下一条 ⏭</button>
+          <button aria-label="后退 15 秒" onClick={() => skip(-15)}>−15s</button>
+          <button aria-label="前进 15 秒" onClick={() => skip(15)}>+15s</button>
+          <label htmlFor="rate-select" style={{ color: "var(--muted)" }}>
             倍速
-            <select value={rate} onChange={(e) => changeRate(Number(e.target.value))} className="ml-1 px-1 py-0.5 rounded border bg-transparent" style={{ borderColor: "var(--border)", color: "var(--text)" }}>
+            <select id="rate-select" aria-label="播报倍速" value={rate} onChange={(e) => changeRate(Number(e.target.value))} className="ml-1 px-1 py-0.5 rounded border bg-transparent" style={{ borderColor: "var(--border)", color: "var(--text)" }}>
               {[0.75, 1, 1.2, 1.5, 2].map((r) => (
                 <option key={r} value={r}>{r}x</option>
               ))}
@@ -259,7 +330,7 @@ export default function NewsApp({ data }) {
         {notice && <p className="mt-2 text-sm" style={{ color: "var(--muted)" }}>{notice}</p>}
 
         {/* Category filter: plain text links, not a row of buttons. */}
-        <nav className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+        <nav aria-label="按分类筛选" className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-sm">
           <button onClick={() => setFilter("all")} style={{ color: filter === "all" ? "var(--accent)" : "var(--muted)", fontWeight: filter === "all" ? 700 : 400 }}>
             全部
           </button>
@@ -273,7 +344,7 @@ export default function NewsApp({ data }) {
         <main className="mt-8 space-y-10">
           {visibleSections.map((section) => (
             <section key={section.id}>
-              <h2 className="headline text-xl font-bold flex items-baseline gap-2">
+              <h2 className="headline headline-2 flex items-baseline gap-2">
                 <span className="inline-block w-2 h-4 rounded-sm" style={{ background: CATEGORY_COLORS[section.id] }} />
                 {section.name}
                 <span className="text-sm font-normal" style={{ color: "var(--muted)" }}>
