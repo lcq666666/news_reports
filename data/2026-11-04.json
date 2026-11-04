@@ -1,1 +1,629 @@
-{"briefing_audio_note":"Placeholder only in skeleton: per-item audio files are listed below but no real MP3 files are shipped. Formal run generates them with Edge-TTS (female voice, 1.2x default).","date":"2026-11-04","generated_at":"2026-11-04T07:00:00+08:00","is_sample":true,"sections":[{"id":"politics","items":[{"audio_path":"/audio/2026-11-04/politics-01.mp3","category":"politics","id":"politics-01","image_url":null,"source":"示例来源","summary":"[示例数据，非真实新闻] 这是一条用于预览版式的政治类示例摘要，正式版会被当天的真实新闻摘要替换。","title":"[示例] 政治示例标题：用于预览标题颜色与加粗效果","url":"https://example.com/sample/politics-01"},{"audio_path":"/audio/2026-11-04/politics-02.mp3","category":"politics","id":"politics-02","image_url":null,"source":"示例来源","summary":"[示例数据，非真实新闻] 第二条政治示例，用于验证每类条数可浮动、卡片与播报列表的渲染。","title":"[示例] 政治示例标题二","url":"https://example.com/sample/politics-02"}],"name":"政治"},{"id":"military","items":[{"audio_path":"/audio/2026-11-04/military-01.mp3","category":"military","id":"military-01","image_url":null,"source":"示例来源","summary":"[示例数据，非真实新闻] 军事类示例摘要，颜色为深绿，正式版按当天军事新闻替换。","title":"[示例] 军事示例标题","url":"https://example.com/sample/military-01"}],"name":"军事"},{"id":"current","items":[{"audio_path":"/audio/2026-11-04/current-01.mp3","category":"current","id":"current-01","image_url":null,"source":"示例来源","summary":"[示例数据，非真实新闻] 时事类示例摘要，颜色为橙色。","title":"[示例] 时事示例标题","url":"https://example.com/sample/current-01"},{"audio_path":"/audio/2026-11-04/current-02.mp3","category":"current","id":"current-02","image_url":null,"source":"示例来源","summary":"[示例数据，非真实新闻] 时事示例二。","title":"[示例] 时事示例标题二","url":"https://example.com/sample/current-02"}],"name":"时事"},{"id":"research","items":[{"audio_path":"/audio/2026-11-04/research-01.mp3","category":"research","id":"research-01","image_url":null,"source":"示例来源","summary":"[示例数据，非真实新闻] 科研类示例摘要，颜色为蓝色。","title":"[示例] 科研示例标题","url":"https://example.com/sample/research-01"}],"name":"科研"},{"id":"large-models","items":[{"audio_path":"/audio/2026-11-04/large-models-01.mp3","category":"large-models","id":"large-models-01","image_url":null,"source":"示例来源","summary":"[示例数据，非真实新闻] 大模型类示例摘要，颜色为紫色。","title":"[示例] 大模型示例标题","url":"https://example.com/sample/large-models-01"}],"name":"大模型"},{"id":"ai","items":[{"audio_path":"/audio/2026-11-04/ai-01.mp3","category":"ai","id":"ai-01","image_url":null,"source":"示例来源","summary":"[示例数据，非真实新闻] 人工智能类示例摘要，颜色为青色。","title":"[示例] 人工智能示例标题","url":"https://example.com/sample/ai-01"}],"name":"人工智能"},{"id":"tools","items":[{"audio_path":"/audio/2026-11-04/tools-01.mp3","category":"tools","id":"tools-01","image_url":null,"source":"示例来源：HelloGitHub（示例）","summary":"[示例数据，非真实推荐] 开源工具类示例：用于预览“今日值得一试”板块，正式版从 GitHub Trending、HelloGitHub、LINUX DO、V2EX 等来源筛选。","title":"[示例] 今日值得一试：开源工具示例","url":"https://example.com/sample/tools-01"},{"audio_path":"/audio/2026-11-04/tools-02.mp3","category":"tools","id":"tools-02","image_url":null,"source":"示例来源：技术博客（示例）","summary":"[示例数据，非真实推荐] 教程 / 博客类示例：好玩项目与教程优先，其他有用的内容也可保留。","title":"[示例] 今日值得一试：教程与好玩项目示例","url":"https://example.com/sample/tools-02"}],"name":"今日值得一试"}]}
+{
+  "date": "2026-11-04",
+  "generated_at": "2026-11-04T15:21:33+08:00",
+  "is_sample": false,
+  "sections": [
+    {
+      "id": "politics",
+      "name": "政治",
+      "items": [
+        {
+          "id": "politics-01",
+          "category": "politics",
+          "title": "程万军 | 生生不息自由魂：一个中国政治钦犯的告白 - 议报",
+          "summary": "这篇自述文章以作者的经历为线索，表达其对自由的坚持。",
+          "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE9WLW9FcE0xclpXRFY3WHgxc3hXSVduM1VSUEZXeTZob212N0hmcVNNMHdmQ3psanM0cHVHNnRYZFVTdG5rN2Z1UmJHcVpoalk?oc=5",
+          "source": "Google News 政治",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/politics-01.mp3"
+        },
+        {
+          "id": "politics-02",
+          "category": "politics",
+          "title": "欧洲急着开香槟？“大错特错” - 观察者网",
+          "summary": "这篇评论针对欧洲对美国中期选举结果的反应提出质疑，认为现在庆祝还为时过早。",
+          "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE95Q1lFM0dRbGhxVGJSSUc0OEhEamFaMkk0NFM3MXdkQVVWUG45Yi00ekpZamxhcGF5VnQ3RjZySHhaSk1uTEc1eUNMOWctdHZQNEdrRE43eHdKRzlRYjN6QWhrR3M3S2FXUXMxOVh0YUZjUnc?oc=5",
+          "source": "Google News 政治",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/politics-02.mp3"
+        },
+        {
+          "id": "politics-03",
+          "category": "politics",
+          "title": "关注美国中选·中东｜对伊朗会怎样，特朗普：对僵局“满意”专家：其政治束缚将减轻 - 凤凰网",
+          "summary": "报道关注美国中期选举对中东、特别是对伊朗政策的影响，提到特朗普对当前僵局表示“满意”，而专家认为其政治束缚将减轻。",
+          "url": "https://news.google.com/rss/articles/CBMiTEFVX3lxTFBTTGxqS1NXR0ZtLW1pVS1aODVHTzZnMXVLZmlTVllzbm02akJaRGE1cTAySmprV0ZJOUV6UmdHdTBHdmNVdVVnMGJkdXE?oc=5",
+          "source": "Google News 政治",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/politics-03.mp3"
+        },
+        {
+          "id": "politics-04",
+          "category": "politics",
+          "title": "公民论坛 - 中共“红线不断转移”？政治学者解析姆巴佩风波 - RFI",
+          "summary": "该节目邀请政治学者解析围绕姆巴佩的风波，讨论所谓“红线不断转移”的说法。",
+          "url": "https://news.google.com/rss/articles/CBMijwNBVV95cUxOUmR3WU40eDhCS19TSUdEcG4yU0E3eHo3SWpRTWxhX0pqTW5HNWhjZGRHTFRwZk1QRmIxQ0xfczE1NlVMMy1lUkZtQ2xmS0ZCZmpaLWRDd3h1S1ZpdFVpcHdyT1pLUm95MGhoUFh4cmZPcGpvOVVaNVFNelBuRWI2MTU0c0NGbGZIOHo3MXVIT25rZHVycTlPNW5HT2R5b0lOTkk4bmEtUF8tR0dRUjNCaVJRdUtzUE5YTXdaN0pucEQtZHhNLW9OckswYnV0T055amJDYVQzd2ZhdXlPTzNwaUhMZXdvQW50bGU1NlR3YVVLU0MyUmo3M1NTVE9CbVNrVzZaWWVMcXp6SElPUGtNQUhuZFMxaFlNNS1lSnMyX3RWM1hFRXRKQXhLVG52amQtSGVwXzNrTnlSQ0xTWGRxR1lTanhPMWxiY29kVWlEYWRONFdpSmNOaEhaLUhITERpb25DRXQ1NXFIbFZyQjBHVlU0VXYxRmgzSTg0YkJNdzFlMVl6RUVoX3Z6cFdfTVE?oc=5",
+          "source": "Google News 政治",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/politics-04.mp3"
+        },
+        {
+          "id": "politics-05",
+          "category": "politics",
+          "title": "美国中期选举：竞选开支120亿美元“打破”纪录，马斯克已花5亿 - BBC",
+          "summary": "报道称本届美国中期选举竞选开支达120亿美元、创下纪录，其中马斯克已花费5亿美元。",
+          "url": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE1scW1wcmtpNmRjamxMdUVXQUdFR3VLclZtM21jM3B6Zm84Mm1aNnNCN2tDWHp1ay1NMklNck9ZWTNtbU5zUjhtamhhdC0zSnNuT3Njb1lJUW5GTXdTanlrQWlOTW5WZlHSAWxBVV95cUxQaFJNNlJuSXRTN3ZwX0M4bFZLVE1kVkRlaVpTaEczeF9VaTRhbW5BbkM3bTFOSGFCWVJhLVo5NkxtZE1KVldoVlZpV19iQkxkNm5Xblg0VktNN1g2d1RYeWNmNUtyeEhHeTdBZE0?oc=5",
+          "source": "Google News 政治",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/politics-05.mp3"
+        },
+        {
+          "id": "politics-06",
+          "category": "politics",
+          "title": "特朗普选举夜连批福克斯新闻，不满民调结果及其报道立场-市场参考 - 金十数据",
+          "summary": "报道称特朗普在选举之夜多次批评福克斯新闻，对其民调结果和报道立场表示不满。",
+          "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE5SUTlNVGVkSlY4SFM5cFBUYmYwdUpYWkFaV29oY2JEdGlfVzduVS1NeEZBZXZqT2kyYmxsUXc2R0VXVjRUdERLaHcwcjI0WE0?oc=5",
+          "source": "Google News 政治",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/politics-06.mp3"
+        },
+        {
+          "id": "politics-07",
+          "category": "politics",
+          "title": "中央委员缺额未补，二十一大领导班子雏形？ - 美国之音",
+          "summary": "文章探讨中央委员缺额未补的现象，并分析这是否预示二十一大领导班子的雏形。",
+          "url": "https://news.google.com/rss/articles/CBMibkFVX3lxTE9IZWxncGNkUmhfeTl2M0twVGNDSGdON2V5VDRGRTB1RnFEUWR4cmlKaDFRVlBkX0NhYnpibXd1VENYUnNpMWIxMjJiWHNET2FpM3JJcUE3UmZ4bWJfRk1BTTYxMVNCUHN1Rkh4dVpn0gFwQVVfeXFMT3JmaE92MEpfZHVhZXpyd0R5Q2llSkI5VjYxOXdVV0djYlliWjZXUGpLSHlHZ1BzS0d4dVZqWjF6UExJbWFlUV9obDRvbDlPN0N4S0tnOER0NXlqbUMzRFg3RGhtcWsxOVN4QnJhM2ZENg?oc=5",
+          "source": "Google News 政治",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/politics-07.mp3"
+        },
+        {
+          "id": "politics-08",
+          "category": "politics",
+          "title": "中东睿评｜以色列的内塔尼亚胡时代：终结还是延续？ - ThePaper.cn",
+          "summary": "这篇评论探讨以色列总理内塔尼亚胡的政治时代是走向终结还是得以延续。",
+          "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE9zdzllNUFGSkpYMlVUTDI3ZW93SkRlYlBTUndIQWNjdmwtcDRYbXM2OTJOX0VRWGVTS0pDaEEyVVJhUmRlbnNSTDhKUzdkWlVWVF9UV19hOTBBS245M0FTbA?oc=5",
+          "source": "Google News 政治",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/politics-08.mp3"
+        },
+        {
+          "id": "politics-09",
+          "category": "politics",
+          "title": "特朗普：我将化身为政治评论员，深入剖析各位候选人胜选或败选的原因——无论好坏！ #海外新鲜事##美国中期选举#  - 新浪网",
+          "summary": "特朗普表示将以政治评论员的身份，深入剖析各位候选人胜选或败选的原因。",
+          "url": "https://news.google.com/rss/articles/CBMiY0FVX3lxTE5zNXYxT242OHRnVUxGaG1JZDZWYWRZQ25QbjlZMnkzNEh2aUVLYXo1a0pESWktOWJUbl9wbTJQd3RrT1pWbXVWbUFIeGVxdDFqWUpjaUZuYmQwNXBnb1RQdlJ3SQ?oc=5",
+          "source": "Google News 政治",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/politics-09.mp3"
+        },
+        {
+          "id": "politics-10",
+          "category": "politics",
+          "title": "视频丨美国中期选举在即 选民高度关注经济与政治议题 - 新浪财经",
+          "summary": "视频报道称美国中期选举临近，选民高度关注经济与政治议题。",
+          "url": "https://news.google.com/rss/articles/CBMieEFVX3lxTE44RzN5aFVCSWlWVmJXazFSX0I4UUwyaEJyVFpJczliWm9HZ20zY0VuN2hUOTBWRU0xZ29HcUQ5QXZnRXc1WFNCaGI1dUxMWk1Gdm9JdDhBeEVQd0tYcFNzMXVCakVPT3pGakQ4TUxLdnVnU0EwTVpmeQ?oc=5",
+          "source": "Google News 政治",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/politics-10.mp3"
+        }
+      ]
+    },
+    {
+      "id": "military",
+      "name": "军事",
+      "items": [
+        {
+          "id": "military-01",
+          "category": "military",
+          "title": "渤海到黄海部分海域执行军事任务，禁止驶入 - 军事频道",
+          "summary": "渤海至黄海部分海域将执行军事任务，相关水域禁止驶入。",
+          "url": "https://news.google.com/rss/articles/CBMifkFVX3lxTE5pZHRjeU5nMEdtRm1OLVNGYjBYaFVpODJReFA5N0p5UHZSVmhTcFMySk02Q2ExR3ZNMXEyVEJ5YkdPcUh3cEh6T1NJWV9YbFNxYVNzcXQ5Q1gyS2ZJYnBXMFFxX2VCbExYaTZpQ2pMOHAxZVhjTzdvMzRMWWRTQQ?oc=5",
+          "source": "Google News 军事",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/military-01.mp3"
+        },
+        {
+          "id": "military-02",
+          "category": "military",
+          "title": "古书院厚植家国情 - 人民网军事",
+          "summary": "文章介绍古书院在厚植家国情怀方面的做法。",
+          "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTFA2X0FIVlhTWG5raVl1LXBDMmMzWmUtbThJaUhWQW40YU9XUWpQcWxpeWwzVlFmbXNMc0syVUNKY08tMjVMNFA2clRSZ3dUb0xvYlZGSW9NMWkzSzI5YkdCNlp0WWZpWGQ0UllzTllXWQ?oc=5",
+          "source": "Google News 军事",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/military-02.mp3"
+        },
+        {
+          "id": "military-03",
+          "category": "military",
+          "title": "菲方加码无人作战能力建设 强化南海军事部署 - 中华网",
+          "summary": "报道称菲律宾方面正在加码无人作战能力建设，以强化在南海的军事部署。",
+          "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTFBhdkVJdXJxUXphejdCcGs1ZV9RWnhvdlMxT01hVkluTFNuLVIydWNUM1dOVWhOdlRzdWwxYjV5WXNIdEpYNEhNeWVUOU96S3Y0Q25lUGRrWC1DZEJYcWpYZHFZeDlHcVh1eUJVSXN3VmY?oc=5",
+          "source": "Google News 军事",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/military-03.mp3"
+        },
+        {
+          "id": "military-04",
+          "category": "military",
+          "title": "威逼利诱本国大学研究军事技术，日方意欲何为？ - 凤凰网",
+          "summary": "文章质疑日本方面以威逼利诱方式推动本国大学从事军事技术研究的做法，追问其意图。",
+          "url": "https://news.google.com/rss/articles/CBMiTEFVX3lxTE5Ebm1aYm5venBzM2YtOXlXbjZDTjdXSmtwcnpyVDNiOWlIa0wzcWxsZFM2N1FkWHF1Wm5iNGpVTWtlLUhROEVVS0l0ZTk?oc=5",
+          "source": "Google News 军事",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/military-04.mp3"
+        },
+        {
+          "id": "military-05",
+          "category": "military",
+          "title": "东风-26B打击美航母视频公开？军事博主又被忽悠 - 风闻",
+          "summary": "文章对网传“东风-26B打击美航母视频”提出质疑，认为相关军事博主受到了误导。",
+          "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE1CT1FPa0JGbnJEb3hLOHZqb252U21ORkdfdTNyTHB3RjF1ZE00NEpnZzVKWmJzTmp2VDhhVVZ6Mm9qM1pTS3JVUlpzdkxsdnNGb3BTUE5pZ1d2LVE?oc=5",
+          "source": "Google News 军事",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/military-05.mp3"
+        },
+        {
+          "id": "military-06",
+          "category": "military",
+          "title": "伊朗议会议长：伊方已在战场及军事领域处于最高级别防御状态 - 搜狐网",
+          "summary": "伊朗议会议长表示，伊方已在战场及军事领域处于最高级别防御状态。",
+          "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxQUmU4T0g2LVRrNy1qMDk4c0ViblNKVWxOUFdReXIyT2RpMjR6Y1JiNUozSURJXy15TVdBbEFPREZUTTgyendIS2gyeE9xWW53R3JJQWpWUURjd0tBVnNJeWh4VHBQZjBjYWNQUm1WVmM1ekhaTmZWQXQtSDN0UzlBSVhvekZmVEdkTlFSeA?oc=5",
+          "source": "Google News 军事",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/military-06.mp3"
+        },
+        {
+          "id": "military-07",
+          "category": "military",
+          "title": "伊朗抛出恢复霍尔木兹海峡通行方案 美以就重启军事行动仍存分歧 - 财新",
+          "summary": "报道称伊朗提出恢复霍尔木兹海峡通行的方案，而美以在是否重启军事行动上仍存在分歧。",
+          "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTE1PZzV2a2puMC1wNDZGZFhLLXZKVjlMWER3NjBOZ0ZDMnJvUUJnNXllTFBZZWVPV2VVTVFyc0pvMUJmRmdmQXI3Q3pLdmVmR0RuR0VualNxeV9UX2h1V2x6bXlmXzZFVjliRnc?oc=5",
+          "source": "Google News 军事",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/military-07.mp3"
+        },
+        {
+          "id": "military-08",
+          "category": "military",
+          "title": "中方是否担心美国在中期选举后恢复对伊朗军事打击？外交部回应 - 手机网易网",
+          "summary": "针对中方是否担心美国在中期选举后恢复对伊朗军事打击的提问，外交部作出了回应。",
+          "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE9JNE5Ib1JpZ0xRaHhCaHBqeG9xZjVSaU9QRkZUckRmdjRHTDVxeVA2dGROZlBRMjFlNnY0UTRValgyU3p6aFA0SG15MVQxelpYbVJ2UzZFYUp6bUR4SW40eDJB?oc=5",
+          "source": "Google News 军事",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/military-08.mp3"
+        },
+        {
+          "id": "military-09",
+          "category": "military",
+          "title": "中国特稿：军事基地战时避难所变身消费空间 重庆防空洞释放新活力 - 联合早报",
+          "summary": "特稿介绍重庆的防空洞如何从战时避难空间转变为消费空间，释放出新的活力。",
+          "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTFBMTkZJS0ZTQWtQQWpEZjdZUm95OWt3WDRJX1ZIUFRXWGdfdDViTW9VTW9EV1pya3d0UmFCQXJ0SFpObkFGMzZGR2VRX0hEMGtHWkVPV3oxVjdFUkowQXk3bm9obW1iRlRhQUE?oc=5",
+          "source": "Google News 军事",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/military-09.mp3"
+        },
+        {
+          "id": "military-10",
+          "category": "military",
+          "title": "“袖珍军史馆”嵌入高原偏远点位 - 军事频道",
+          "summary": "报道介绍“袖珍军史馆”如何嵌入高原偏远点位。",
+          "url": "https://news.google.com/rss/articles/CBMifkFVX3lxTFB5Q05wLVVZNWlEeVZIS21BN0c0dHBpd0EtTGp6UWhzY0ZlZnVWd29kVlAzNk5sNFdmbFFqQnhuN3RsUkRKbDlCY0otemVnU0p6emRadmo1WHNwZ2Q1bWRUeDQtT3hqMEVZN3VlUmItTm5wMDROcGhodUg5YkdIQQ?oc=5",
+          "source": "Google News 军事",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/military-10.mp3"
+        }
+      ]
+    },
+    {
+      "id": "current",
+      "name": "时事",
+      "items": [
+        {
+          "id": "current-01",
+          "category": "current",
+          "title": "特朗普：将停止向以色列提供每年38亿美元的安全援助 - RFI",
+          "summary": "特朗普表示将停止向以色列提供每年38亿美元的安全援助。",
+          "url": "https://news.google.com/rss/articles/CBMi6wJBVV95cUxQVGIwbmk1aEpoal9MRks0RzRMMXBNTlVtS0JDc3NhMzYwcGd6dUxSRE5ZR3U4MkZVRUFyNUZ1dXVuMmhSOXBRX3lrbWNNQjg0Y0NkVTdVUnVEZVpkWjF1VF9GWWFkNWdDMHU2RnI3dFJBbUF4QkNKelJjbmVDcTFfYjd4b0pRbWhMb2tXV3RWNXoyaUNEcTBRZDBPajhPeGpmOHEzTkdyaE4xYkw4M25GcUJqWUdMUzNyVEJuNkxiYlUwaExvVUhZVlNKbEJ6UU9VdjhFbS02UWZVdEpFT1Z2aURINXVnMW9vTUxlSGdfaFkxNHpBR2dlSTBPVGNMTzA3VjdtUGpvODdiUU5CT2dBUXFBWXF5YnptRXVkVV9Ba1ctS1c2VVE0SGluN3Y4MHFmLTBubXplZnRHOXQwVmJ3X3gyUzB5Q2RtQXBuaG1mWThhM0N3dHptRlkxQm5RMDVuczliNVhXeE9CRlk?oc=5",
+          "source": "Google News 时事",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/current-01.mp3"
+        },
+        {
+          "id": "current-02",
+          "category": "current",
+          "title": "陆委会称现在没有“台独”问题 国台办回应 - 新京报",
+          "summary": "针对陆委会称现在没有“台独”问题，国台办作出了回应。",
+          "url": "https://news.google.com/rss/articles/CBMiZEFVX3lxTE5wSjF6eU1BX1dxcnZKaHlXcnR3NG9La1ZRaGVsSWVKWEpSZklWNDdnWGxOVmtmUG5yTUp4UU5MWENrdjUyNHJuT1oxQ3J0dl9XQTluV1l5UzlrdVZ3ZThOWU9vdGQ?oc=5",
+          "source": "Google News 时事",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/current-02.mp3"
+        },
+        {
+          "id": "current-03",
+          "category": "current",
+          "title": "民主党夺回美众院控制权 川普后半任期面临国会制衡 - SWI swissinfo.ch",
+          "summary": "报道称民主党夺回美国众议院控制权，特朗普后半任期将面临国会制衡。",
+          "url": "https://news.google.com/rss/articles/CBMi7wJBVV95cUxQZWIyUFk1c3lrQzNxLTBNQV9aUXVwXzlXOE8yNlZiVnRnSUhzby1TWUpiS1BCaWlFS1Bhd2swZ0lTQk05YUgySEpyek5EVGRFXzdCYkNucjlOVUxiRnY5amRMU1ViYm9IbUVkY0Q4V01fbTNxWGxwM1NabWhqQjh6MGk0Vkg5UTFTRmFZREh2bDlmMUxqV1RnM3dvYmFlSEJqOFNNQnpOaURvUG5SeUlzLXdtbnNSeTlQSVdCNml6YVdVb0FFdEJvY3EtVVROZXhiWEdoMmlsTmZKN0d2UGc1TTBDakVTdndEREZ2RkFscXRDT0VFeklEUjhuMlQ4V2RYVmo1NVhWTHFtQkxMS2ZyUGxxeFRUYkY4aUxfWUNLRTNxTk81TS00cFlxMHFTWFhvaDEzeFdOU3J5VDRtMElodXVGQ18zT2FFU1J1SkxoSldrZmxXcFBtSlA3LTBDaVdhSUtPTE9TRFlBb2lSWTg4?oc=5",
+          "source": "Google News 时事",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/current-03.mp3"
+        },
+        {
+          "id": "current-04",
+          "category": "current",
+          "title": "6名荆楚奋斗者：好记者，永远在路上- 湖北日报新闻客户端 - 湖北日报传媒集团",
+          "summary": "报道以“好记者，永远在路上”为主题，介绍6名荆楚奋斗者的事迹。",
+          "url": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE9Bck1DT1REb05QOEtwVjh0Mml3N2Vsbng0YUtoN29yZllmbFdkS3FHcjRvWXdRY3paeE1qRld4N0hTc3QzNm5zVzFSY3FhY3pUSmlIVEcwUm4?oc=5",
+          "source": "Google News 时事",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/current-04.mp3"
+        },
+        {
+          "id": "current-05",
+          "category": "current",
+          "title": "2026-11-04 《放眼世界》： 贵州发现远古化石属可完全于海洋生活之两栖动物新物种 - 香港電台",
+          "summary": "香港电台节目介绍贵州发现的远古化石，认为其属于可完全在海洋生活的两栖动物新物种。",
+          "url": "https://news.google.com/rss/articles/CBMizwFBVV95cUxNQWN2SFA0X2pRMWlDbFBPRWdQYnNmRkNSOE5Db2hQc0Rld040SFZ0amNQTWh1bmMwTVlfVURYMksxcU5xeHh4THpGWE1TYkNISVU0M0xyX3M3RmNvSHRNRWk5UjJOUEpLVzdVRm9xR2FPLVpFdk8tbFdZU2h0RnV3ejlrRVpqb2MyZkpjZHIwMUdtcjl4WXFvMlZaVGpSeTlPUHd0UFVDZlJwcnFnTjhOcUFiWXNEWElGQ0pkV3lSQTBzRm5PaUJ5dVJIRTJLTE0?oc=5",
+          "source": "Google News 时事",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/current-05.mp3"
+        },
+        {
+          "id": "current-06",
+          "category": "current",
+          "title": "【時事金掃描】川普收格陵蘭大禮 「幣安」被盜揭朝鮮黑客祕辛 - 新唐人電視台",
+          "summary": "节目内容涉及特朗普与格陵兰相关话题，以及“币安”被盗事件背后揭示的朝鲜黑客内情。",
+          "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTFBLby0xSl8wTktIaTZsdnhITkpjZWk4N2R3QVFFdkxvb2hQTVplWUowR1hqQVItX3FCQ0g2NWM4MUVGLW9ZclFtdnliejNxbk11WjlEaDYtQmkxSGpxdVZRONIBZkFVX3lxTE5MZUhuWUdhV3ctU2Q4Rm9lTnlqc2I4enNiN2VGZGZ2T2dwaW1RMV9QVnFDWEdXLVpLbnZqYmctc3RzSmExLUdOVU1vTE5sMWZ0aHZjMEkxeGpSRThVWVAzU29JUldyUQ?oc=5",
+          "source": "Google News 时事",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/current-06.mp3"
+        },
+        {
+          "id": "current-07",
+          "category": "current",
+          "title": "香港第三季经济增长升5.2%胜预期 惟市民能否受惠成疑 - RFI",
+          "summary": "报道称香港第三季经济增长5.2%、好于预期，但市民能否从中受惠仍存疑问。",
+          "url": "https://news.google.com/rss/articles/CBMi-gJBVV95cUxOLS1sSEZjTzExV1lLNndaS1RSYUprWnBkX2R3dHVCZ3VteF95M1pDUmdyT25xLWIzUHItVDZaU0tLWE9mcTlnWGdnU09sV2NuRGVaM1VWWXVaQ3g1dkw3X0ZwSUJsQjBCXzJRdUE2Ujh6dE1DbHNtcVVxOWp4ZnphRGhkOURsR0UxZGV6STVfQXAxU05yUWstZjZhV0EzbU5zME9mblRqMUxfNjl5Qld3UWtBSms1ZGJ3cWdWX1NwalV2c0JIMzhEZVQ2MGdLaGVpTm0zbHcyakt0azdYbVQ4QlY3TEFaWFYxc2dXZFNUcTBxWFJHVlN3V0w5a1BZWU53Tm9ZU001OS1jWFdRN3l1b3pYUUYwNE00bU1YSEs4dTBvbzc2SWh6aTB1Q0Rnb1l4cVlMYTJLVDA5NjlWOEZGcGxGQ3hWa2ZYR19nQ1lvMU5EVXM0ZHNpVm14VUt6LWQzOER1UXFURk5QeGhhODBvQmh0LW9jYklueWc?oc=5",
+          "source": "Google News 时事",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/current-07.mp3"
+        },
+        {
+          "id": "current-08",
+          "category": "current",
+          "title": "民主党贝塞拉狂胜对手 接棒纽松出任加州州长 - SWI swissinfo.ch",
+          "summary": "报道称民主党人贝塞拉以大比分胜出，将接棒纽松出任加州州长。",
+          "url": "https://news.google.com/rss/articles/CBMiywJBVV95cUxPcWlXLTctaUV5WVhBSmF4OERoR2RtaE92S0FuWDg3a0lqU2pjRDc1SDlUVDlDX013aGFqT2Y2SmdfZy1FcGxXS0VWUlVWTDZwbEdkQ1pDSkZFSjJJM1FEUmhjdEhRR0dBRXp0Mm8tOVlFUW5DOFZmNTd3RVNsbHdrLTgxU1dWQUhZaVN6ZktNYzFIc0FnOXJwa0gxWEJFaVY0a0FVRmlneUhrRWctN21idWYzRVBPV3d0ZzlHMGtpbC0yUFd0RktEazlZOXJUYXBuN3pEc1N3LVQycGswUTdjMDhNai1tZkJNajZvM0hxa0pJazRjV1lEU1JYQ2tET0tuZDc0OWhjbkVUcXBLUVgxVkZwVlptRkRXVjlhZVkwXzB1SENLQUxUR2VsRzZZSG9CYVZ3QnllRVNPWFlROXRJLVE4OWxhVFZCS2ZR?oc=5",
+          "source": "Google News 时事",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/current-08.mp3"
+        }
+      ]
+    },
+    {
+      "id": "research",
+      "name": "科研",
+      "items": [
+        {
+          "id": "research-01",
+          "category": "research",
+          "title": "中国间谍活动：利用虚假身份窃取德国科研成果 - RFI",
+          "summary": "报道称有人利用虚假身份窃取德国科研成果，涉及中国间谍活动的指控。",
+          "url": "https://news.google.com/rss/articles/CBMi0AJBVV95cUxQUTUycXJYdTlUOW9KamU1dHFiWm9oV2loVUE3YTdUV215UVZkVmJPY0V6bnlDSG1ZWkFudDBtdGtEZGg4UjlyQjRNZDhNU3MwSzhlbVYxM3R5SlZlemRHS2J4ZVVlbHFIVF8yVVlmc2JWSjAxYW5JTWFmaVVSSHZ2cHhHQWI1YUFQZTIzSDFUWGl6WGdZR3ByU2VwWXEwQVZHZDZwajRkTFZBWGE1MV8tbzczR1o0VEItNDcwSFp0VEZuNmJFVDJOZ0ZzM05nUHNKZy1JTVF4TDRtTEQtV1BITU1mZldVVUpJVmNlUkRYX0ZRZGdIbU53LTZzM09EajFENzd1eEM1V01paU43b2d4NHNBVEp2OGVQalkwTTVTS19wNmYtOHJHMVhRLTF0b3lRamZuMHJUMnpPREJUYWV5c3FZTDNaYjN4N2Y4S1gwNkk?oc=5",
+          "source": "Google News 时事",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/research-01.mp3"
+        },
+        {
+          "id": "research-02",
+          "category": "research",
+          "title": "浦江国际学院硕士生获ACM SIGBED学生科研竞赛第一名 - 上海交通大学 新闻网",
+          "summary": "上海交通大学浦江国际学院硕士生在ACM SIGBED学生科研竞赛中获得第一名。",
+          "url": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE5NOU5EMF9sS3VwNU5peVIzNXcyLUFIRXpjbFhTV3JNUTAxSWxWeXlHaTBTOFF4N0x6QTZkLWFLeWhUN3VsZHdhMVlMWU1aNnNxTHBmSGFkUThpSDdXQzZ3?oc=5",
+          "source": "Google News 科研",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/research-02.mp3"
+        },
+        {
+          "id": "research-03",
+          "category": "research",
+          "title": "【创新在大工】化学学院科研团队在国际顶级期刊《自然-催化》发表最新研究成果 - 大连理工大学新闻网",
+          "summary": "大连理工大学化学学院科研团队在国际顶级期刊《自然-催化》发表最新研究成果。",
+          "url": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBuSEprNUZnUjEwUUlOemk2QnVZdVFtS3doRE8tOVpEbV8xdG1maWdjcVd4UnBMQW9xMEZnWUlQeE82dm1ibEhDcnBORDVfVkcwRk5mQndlaEU?oc=5",
+          "source": "Google News 科研",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/research-03.mp3"
+        },
+        {
+          "id": "research-04",
+          "category": "research",
+          "title": "科研育人出新果 生康学院本科生发表两篇SCI - 武汉纺织大学",
+          "summary": "报道称该校生康学院本科生发表了两篇SCI论文，体现科研育人的成果。",
+          "url": "https://news.google.com/rss/articles/CBMiV0FVX3lxTE9DMDlsSUZWNkRiYWg2WEFaWkpud0N3dDVUOEJpNXRXSUxhZENrMUlEa1d2TFhOb3lsYWswYW1TM2FPUnJaNFQ5MUpOeEZveWF3UHNRSmhZMA?oc=5",
+          "source": "Google News 科研",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/research-04.mp3"
+        },
+        {
+          "id": "research-05",
+          "category": "research",
+          "title": "跳出短期KPI！44名青年科学家获最长15年科研支持 - 教育在线",
+          "summary": "报道称44名青年科学家获得最长15年的科研支持，意在摆脱短期KPI导向。",
+          "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTE5IV05oX1REN3dRUUpkU0FiREdHZGxuVE5QR0VPWlMxZ29CSjZZc1QxNTJzTDVBZjRNbGF5Vy1mdDhjMjJHZ00yTGhGMzZPUTlDWkREc3dPMVhQd3p3Q0ZXZFduUGI2bmR3NHc?oc=5",
+          "source": "Google News 科研",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/research-05.mp3"
+        },
+        {
+          "id": "research-06",
+          "category": "research",
+          "title": "北航师生亮相第15届国际塑性技术学术会议（ICTP2026） - 北航新闻网",
+          "summary": "北航师生亮相第15届国际塑性技术学术会议（ICTP2026）。",
+          "url": "https://news.google.com/rss/articles/CBMiV0FVX3lxTE10WEZrTjRwT2VpRlBTVVdiU3BPcjV1YW5GalRWdUNQRWgzcklNdXhjd2dxc0ctamtwTUNFanBPZDJkcDBvR29yZXZtLWFrS3JsU3dUZzFRUQ?oc=5",
+          "source": "Google News 科研",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/research-06.mp3"
+        },
+        {
+          "id": "research-07",
+          "category": "research",
+          "title": "中外联合培养，西南医大再度牵手德国这家知名医院 - 四川在线",
+          "summary": "报道称西南医科大学再度与德国一家知名医院牵手，开展中外联合培养。",
+          "url": "https://news.google.com/rss/articles/CBMiY0FVX3lxTFBJRDdqUDBiYkR4dTNFQ0gzTmVLVkkxREpRUzRCSi1FUmMxRXZDd0x3S3ZOcG1XcE5NbEFDeXZPS0Jkb2tYQllRaFZQX3BIbzBiVlEyUTV2Z1I1eklUQlJjWHcxNA?oc=5",
+          "source": "Google News 科研",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/research-07.mp3"
+        },
+        {
+          "id": "research-08",
+          "category": "research",
+          "title": "人民日报健康客户端走进新西兰开启Beauty Rush溯源之旅，从科研合作到源头品控，探寻女性健康新路径 - 新华报业网",
+          "summary": "人民日报健康客户端走进新西兰开启溯源之旅，从科研合作到源头品控，探寻女性健康新路径。",
+          "url": "https://news.google.com/rss/articles/CBMia0FVX3lxTE8tUEljb0VjRTZqWEdrRlpuUEtlR2pBWHFQZHh2eGUyTHlaSHZKa0NudW1Yd19SNGVnU0RBbEZTOEc3ZW5iRmhoMmQ5a3JnQUw3d0R0TXFkQXB4SHRwVkF5ZVhwWThxOFRDOVVB?oc=5",
+          "source": "Google News 科研",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/research-08.mp3"
+        }
+      ]
+    },
+    {
+      "id": "large-models",
+      "name": "大模型",
+      "items": [
+        {
+          "id": "large-models-01",
+          "category": "large-models",
+          "title": "国产大模型再上新：混元Hy4正式发布，腾讯称首次进入最强开源模型梯队 - ThePaper.cn",
+          "summary": "腾讯混元Hy4正式发布，腾讯称其首次进入最强开源模型梯队。",
+          "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTFAyZUpwem9NeTV6TmxMSVcyeHlwZHItaXQ0VWVySGR4TEthWGlWMDlBalg5U0k1bHlMdVIwbVlMc3duU0g0V2hMQVdtRmMwVk85ZzNsc3dJb3JNcnVKU0dUYw?oc=5",
+          "source": "Google News 大模型",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/large-models-01.mp3"
+        },
+        {
+          "id": "large-models-02",
+          "category": "large-models",
+          "title": "专访群核科技董事长黄晓煌：通用大模型不会替代空间智能，确定能力边界是关键 - 凤凰网",
+          "summary": "专访中，群核科技董事长黄晓煌表示通用大模型不会替代空间智能，确定能力边界是关键。",
+          "url": "https://news.google.com/rss/articles/CBMiTEFVX3lxTE1NcFZxcnpRRFBGYzRUU1VVYWphc2N4UUtLUEJDcWxQb1ltT0VTaEdRSGpDYUNwWXF1NDlHR3pVbXlfQXc2UkNZQ01pMGY?oc=5",
+          "source": "Google News 大模型",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/large-models-02.mp3"
+        },
+        {
+          "id": "large-models-03",
+          "category": "large-models",
+          "title": "刚刚，Anthropic开源FlashProve，给大模型办了一张「防伪身份证」 - 手机新浪网",
+          "summary": "Anthropic开源FlashProve，文章将其比喻为给大模型办了一张“防伪身份证”。",
+          "url": "https://news.google.com/rss/articles/CBMihwFBVV95cUxOR043eUt2TDJDTW5NcUlrRFVEMjc2VE1qNnY1dTlRNzRIVWJ3TXljb2ZDSkFpVGdzQllpUU9YNEdWTDRmU2EzZGduLThHczV0bkxRdFNNRFVKRDRESEdiMk16LW5scUsyX3AtV3lvOFlxZk9kalZKbGxvRVpEbFVMTHBHQ3pBSDA?oc=5",
+          "source": "Google News 大模型",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/large-models-03.mp3"
+        },
+        {
+          "id": "large-models-04",
+          "category": "large-models",
+          "title": "中国开源AI大模型持续“圈粉” - 环球网",
+          "summary": "报道称中国开源AI大模型持续受到关注与欢迎。",
+          "url": "https://news.google.com/rss/articles/CBMiV0FVX3lxTE9sZ2JoQWlYZGZvRXRKTXd2VXJBdXdKYUFnUGFHSkZDOVF5M2FnMWZwQzN1aGVuaFdma1pDOEFSMHdmcHphZW5RY3NNUVFaclg0X0YzcTE1MA?oc=5",
+          "source": "Google News 大模型",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/large-models-04.mp3"
+        },
+        {
+          "id": "large-models-05",
+          "category": "large-models",
+          "title": "国芯训练国模！DeepSeek下一代大模型计划用昇腾芯片训练 - 财联社",
+          "summary": "报道称DeepSeek下一代大模型计划使用昇腾芯片进行训练，实现“国芯训练国模”。",
+          "url": "https://news.google.com/rss/articles/CBMiSEFVX3lxTE1MeENRQVRPRjJmX1lvWWw3dDFYN01ROHZ0QW1UdjlDNzdWcWxwMmtnLTBWajhfcW9fN004QjQ1OTZOYkJya3g2Yg?oc=5",
+          "source": "Google News 大模型",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/large-models-05.mp3"
+        },
+        {
+          "id": "large-models-06",
+          "category": "large-models",
+          "title": "图观中国| 激增1400倍的Token背后，中国大模型正在悄悄改变什么？ - 新浪财经",
+          "summary": "文章以Token用量激增1400倍为切入点，探讨中国大模型正在带来的变化。",
+          "url": "https://news.google.com/rss/articles/CBMieEFVX3lxTE9CLWdEYVRsb00tOUtGUW51blpldXVHZWt3WWNZN0FDcUZ4MVN0ZjlPLTFTdDJscEMxYzZWcHFGb2ttVFFKMExDSFNwNnQ5X2t2aHNQVTRfRWlRTTdYeEVwZXhleXN0Tzd0aWZCSm9iRFVScU5RYzNHYQ?oc=5",
+          "source": "Google News 大模型",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/large-models-06.mp3"
+        },
+        {
+          "id": "large-models-07",
+          "category": "large-models",
+          "title": "美团发布LongCat-2.5大模型，“国模国芯”实现新突破 - Meituan",
+          "summary": "美团发布LongCat-2.5大模型，文章称“国模国芯”实现新突破。",
+          "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE1nR3AyYTdwNDNEMWozWE5NSHhPbXdDT3pvWno3N3RMTHR2U29FbE9ka05EbTRvYThaWGlqRHpadERoTTBrSjAzbWR1NEEydFhyLWZqVXY5MTRvQQ?oc=5",
+          "source": "Google News 大模型",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/large-models-07.mp3"
+        },
+        {
+          "id": "large-models-08",
+          "category": "large-models",
+          "title": "为何选择开源路线？多家大模型负责人：加速通用人工智能到来 - 东方财富",
+          "summary": "多家大模型负责人谈及选择开源路线的原因，认为这有助于加速通用人工智能的到来。",
+          "url": "https://news.google.com/rss/articles/CBMiZkFVX3lxTFA2UmVXRDNBNlpkTXBUS05SM1VWMlNoLXVpNkZNMDlReE1yUTNhVFlNSzBXVjRJWXVfWFNSbHNRTXVoaDlpYWRPaGFfOTZhc09xTVdCdWhfYllYcng2WnlFd083am9lQQ?oc=5",
+          "source": "Google News 大模型",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/large-models-08.mp3"
+        },
+        {
+          "id": "large-models-09",
+          "category": "large-models",
+          "title": "让AI大模型推荐药物靠谱吗？Nature Health论文显示，AI偏爱“网红”药物 - ThePaper.cn",
+          "summary": "Nature Health论文显示，AI在推荐药物时偏爱“网红”药物，文章探讨大模型药物推荐是否靠谱。",
+          "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE9LSHNlQTgweWRoRk5VSHNvdGhlcGdmdWYxZk1iZWw4UU5sREgtMXRtamRTWVZnMlVEZDRHOUtWb2h5Nkk3OXE3Q2dnTFpBVVFXQ1E2UFVzUmRZcDhmQncxMA?oc=5",
+          "source": "Google News 大模型",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/large-models-09.mp3"
+        },
+        {
+          "id": "large-models-10",
+          "category": "large-models",
+          "title": "腾讯混元Hy4大模型上线 每百万Tokens输入最低0.3元 - 观点网",
+          "summary": "腾讯混元Hy4大模型上线，每百万Tokens输入最低0.3元。",
+          "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTFA3QUZ4OW04emJRVlk4Z1NGc2lHdDhpaVRjbUtNSi1GRVd3cW5DM1k3bTR5Rk5OUVNSTjktNlVGTGI4elltNlQ0QS1MOVBjUHZBUW5sbkItYzNyTnFnM2RvZUdR?oc=5",
+          "source": "Google News 大模型",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/large-models-10.mp3"
+        }
+      ]
+    },
+    {
+      "id": "ai",
+      "name": "人工智能",
+      "items": [
+        {
+          "id": "ai-01",
+          "category": "ai",
+          "title": "2026-11-04 《环看天下》：韩国AI开支明年倍增 李在明： 国家增长须转向全民共享 - 香港電台",
+          "summary": "香港电台节目关注韩国AI开支明年倍增，李在明表示国家增长须转向全民共享。",
+          "url": "https://news.google.com/rss/articles/CBMizwFBVV95cUxQOWh6WjAxeU1ndm5WcXo0VHNheFVjR2czMGx0by1qS2swTWJFSzFQVVY1YlUwRjg2cEkweFRDYUFiWTBEOU9aODUxdU1ZY09oQzBiSW9pdEFrVXlLdGtTRW9pRjRPN2RFOGNIOEszVC1ObkI1VkZOOW1DUnpBSUFzMVdSMndJNXRXWlVJUm9PZkdqdXdmXzI2ZGJHSXcyRmlyN3czdDNPMXRQbUMtVGs1VktjMG5iRE9xRGdXb01YVVJ3TWxXRWlxcUpQcUFMVHc?oc=5",
+          "source": "Google News 时事",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/ai-01.mp3"
+        },
+        {
+          "id": "ai-02",
+          "category": "ai",
+          "title": "科技时空 - 美国中期选举：人工智能的大量使用，加剧选举信息混乱 - RFI",
+          "summary": "节目探讨美国中期选举中人工智能的大量使用如何加剧选举信息混乱。",
+          "url": "https://news.google.com/rss/articles/CBMiygNBVV95cUxOS2JaaFI3RTF2dTRVaHd1Vlg5LTNKbUFUWUJRTlhjcnNKQUdGX0s5b24tMnZONHZhLTMwWGNlMHk0aFU2RzdENzVTdkl2MkU3OW5aMm53NTdsaTE5NmFsdEpIWjdsOENzTlFXLS1uLV9pT2hYUzZnZ0phUFhVNnVhMGdXOWNobUg3OS04SnZxRGdoc0JTNk5oYml2RTNsd2h0aTh2eEdDeDVkZEZYdERPQ0N4bEpMeFBHQm9ZZE5kSTBqRExoTktlSVdZOE9aZTAzVzI4YjN4bGM0bmFxTzJ6UWpZdUxjOHhJVmk4NlJiNmRMVzlUV1liQWNCX2p6N2pzUEFod1ZQQ2VGNkJHQWRNcHRvanZ0c0tmZzdhNm5fdF92U0NJZjNoTnpjSUZBcGZSMG84MzdiM3dGcDJDdEpndkVlUmtCR19nZlVNNy1wT2lpYTFEN3N5cWpmekFHMWZQOWF4WEcwRUROaWowUThzQXI1RmJ4Zy02eElyUnFNRnNoOEZJVC12b2F4Y3hhUlNRQ1lBbUJSajl2aDNIUFRBQVVCUEVSRzl6QzhTRGJZUGhpUXU0V2ZlYS04NGJXV0lxV2M2NEpZWkROZw?oc=5",
+          "source": "Google News 时事",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/ai-02.mp3"
+        },
+        {
+          "id": "ai-03",
+          "category": "ai",
+          "title": "全球人工智能热潮中的“黑马”：马来西亚 - 纽约时报中文网",
+          "summary": "纽约时报中文网将马来西亚称为全球人工智能热潮中的“黑马”。",
+          "url": "https://news.google.com/rss/articles/CBMid0FVX3lxTFBKakNndFh0cC1OWkIyalpudEJFNDEtYlBIY1c0c3hjSm5DYjRzMDd5Vkk2MUhVTzM2d2ZNbjVlWFlZQm00SUQ5MXM5N2tLNXl1Nm5zTVA3S1lrNnViTGlZS2xfa2NwWkU3aWxFNEhkc0h6MFcyQmpj?oc=5",
+          "source": "Google News 人工智能",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/ai-03.mp3"
+        },
+        {
+          "id": "ai-04",
+          "category": "ai",
+          "title": "法国世界报 - 中国首部全AI电影惨败，被指“完全没有情感” - RFI",
+          "summary": "法国世界报的报道称，中国首部全AI电影票房惨败，被指“完全没有情感”。",
+          "url": "https://news.google.com/rss/articles/CBMikANBVV95cUxPaTduWFo0QkNlb0tSSWVyNE1fWVIyWU5YWG5VOFg5ZnlqU3lEazFEcnNmZUJZb05mRTZRLUt5WjhubWpKNE1zeFFKTEsyX0xaMi1ldnlCTGVScThHaF9Id2E0NGlZelNkckFyNGlVaTFaZVNGbldFM0VXOFB0RkFReWhYQzBJX2pIZnpnTG5GYktHbVdUX2wxR2QyN2VSR3haT25TUkVUbEtMNm81bzF3VXN6alVWMXpQOHRKNzVpNUlQbnhxeFI2NU9uaEs1LW5lMF9qa19qOXNYWFRvSldxdUEtUTcyM0dLVm1IekVadXM5Q0hJdDJqeVVFY2lIQ0VKX0pDS0tLLWlzYVJqMGk1V24zUHdmeFI4MjR0Y2g5elBqT3NFMHQwT3U5aFk1Q2Z4ZElpcmQ0aEs4MGpwUi1Ibkp4MFloY3pXUVNoc2luNkxvbjN3OUs1MUY1aml3YTdrNFRHWXRrVkxyRWJzUWZURHNyRWhDYUhzVGhOb0I2cThqNTlzX1pMVHVVWnA0c1F1?oc=5",
+          "source": "Google News 人工智能",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/ai-04.mp3"
+        },
+        {
+          "id": "ai-05",
+          "category": "ai",
+          "title": "中国将加快推进人工智能基础性综合性立法 - 财新",
+          "summary": "报道称中国将加快推进人工智能基础性综合性立法。",
+          "url": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE9JVGVleG1nWVFFVUlHS25JUUJVY0E2eHQwdFc5aVd5NnRwekgxOWhFOGZfaTZqM3FwdF9GeXJtSkhpWDVXTENnbEstdFZJaEZMU0s2eXl1Q1d6aHJLRHRB?oc=5",
+          "source": "Google News 人工智能",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/ai-05.mp3"
+        },
+        {
+          "id": "ai-06",
+          "category": "ai",
+          "title": "海报｜人工智能乌镇对话：探索AI开源发展与社会价值 - 光明网",
+          "summary": "海报介绍人工智能乌镇对话，主题是探索AI开源发展与社会价值。",
+          "url": "https://news.google.com/rss/articles/CBMiZkFVX3lxTFA0MHdaYWkzSVM1MmVZVEQzRVBXeGFaUXpXek1FZm4xLVlOdUlldjNpWjZVSGZCT1I0TFB4d0luT2llQThXS2ltZkdBTnlhYWkzTEU2ZkkxQ1pyWTFhTFNwRDhGbEwtZw?oc=5",
+          "source": "Google News 人工智能",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/ai-06.mp3"
+        },
+        {
+          "id": "ai-07",
+          "category": "ai",
+          "title": "AI时代，大学如何转型？|香港科技大学|北京大学|重庆大学|厦门大学|兰州大学_手机新浪网 - 新浪财经_金融信息服务商",
+          "summary": "文章探讨AI时代大学如何转型，并提及香港科技大学、北京大学等多所高校。",
+          "url": "https://news.google.com/rss/articles/CBMi2gFBVV95cUxQUG5zbjBfemlGRHdXb00xTGJIVFctSERjSkJxQXRlZGQxVU1EbzNFblpYZ2tWT1RNSVdFMDdDb2J2NUJVTzVESlRZdFdlTEtzWE50eHlaTlI4Uzl4RGMxZ1FkdWtQRHg1M2ctR1NfdnZBOFhiMEFzOVlQaDUtZFkwSjhKelZRVF9qX2RtdjlVb2ZSeExqVGZtSFEtZUlzVE1OS2hUWFNIWWhyMUo4MXNmS2trbDhNU1FMWWozd3k1S1UyMzVfamhQM2ctcy1IaTlaUnBBUGp5QXdTdw?oc=5",
+          "source": "Google News 人工智能",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/ai-07.mp3"
+        },
+        {
+          "id": "ai-08",
+          "category": "ai",
+          "title": "埃里克·索尔海姆：人工智能通过多种方式为绿色革命注入更强动力 - 中国经济网",
+          "summary": "埃里克·索尔海姆表示，人工智能正通过多种方式为绿色革命注入更强动力。",
+          "url": "https://news.google.com/rss/articles/CBMid0FVX3lxTE9NczBicENBUkJNdkhqaFJicUoyX3dUQXNCanA1b0JSbmVXRjNIV2toY2pQT05TMmZyS2ZUb1hsWGxwdW9NdFRSVUxYLVoxZG9lUDdlUkx3NUNyX3pBQ3Y5bVk2UE1Tbi1naU9RQ2hvWTVyUVZ0R3ZR?oc=5",
+          "source": "Google News 人工智能",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/ai-08.mp3"
+        }
+      ]
+    },
+    {
+      "id": "tools",
+      "name": "今日值得一试",
+      "items": [
+        {
+          "id": "tools-01",
+          "category": "tools",
+          "title": "Claude 不到 10 分钟搓了个这个，码农真的要玩完了",
+          "summary": "网友分享用Claude不到10分钟做出一个可用的小朋友四则运算练习站的经历，并感慨开发速度之快。",
+          "url": "https://www.v2ex.com/t/1253990#reply149",
+          "source": "V2EX 技术",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/tools-01.mp3"
+        },
+        {
+          "id": "tools-02",
+          "category": "tools",
+          "title": "[开源] 写了个台铃电动车钥匙串 APP，蓝牙连上打开 APP 两秒内即开锁",
+          "summary": "作者开源了一个台铃电动车钥匙串APP，逆向官方应用后用Kotlin重写，实现蓝牙开锁、上锁等功能，启动更快。",
+          "url": "https://www.v2ex.com/t/1254347#reply14",
+          "source": "V2EX 创意",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/tools-02.mp3"
+        },
+        {
+          "id": "tools-03",
+          "category": "tools",
+          "title": "🎧 一个 App，把 5 个音乐平台装进口袋",
+          "summary": "帖子介绍音乐聚合应用Museflow沐声，把网易云、酷我、酷狗、QQ音乐、咪咕五个平台接入同一界面，搜一次即可跨平台选版本。",
+          "url": "https://www.v2ex.com/t/1254393#reply4",
+          "source": "V2EX 创意",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/tools-03.mp3"
+        },
+        {
+          "id": "tools-04",
+          "category": "tools",
+          "title": "在浏览器端侧运行的 Office 2003 风格办公三件套，支持编辑 docx/xlsx/pptx/markdown，开源、可自行部署",
+          "summary": "帖子介绍一个在浏览器端运行的Office 2003风格办公三件套，支持编辑docx/xlsx/pptx/markdown，开源且可自行部署。",
+          "url": "https://www.v2ex.com/t/1247269#reply169",
+          "source": "V2EX 创意",
+          "image_url": null,
+          "audio_path": "/audio/2026-11-04/tools-04.mp3"
+        }
+      ]
+    }
+  ]
+}
