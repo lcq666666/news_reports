@@ -2,34 +2,138 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Redesign 2026-11-04: editorial restraint.
-   Neutral foundations, hairline rules, no shadows, no gradients.
-   Category colour is an accent only (dot + label in NewsApp.jsx). */
-:root { color-scheme: light; }
+/* Refactor 2026-11-04 v2 — zeroone/frontend-ui skill (2026):
+   - Two-tier tokens: primitives in OKLCH, semantic tokens on top.
+     OKLCH is perceptually uniform, so dark mode flips the L axis
+     instead of hand-tuning every colour.
+   - Fluid type scale with clamp(): no breakpoint jumps.
+   - 8px spacing grid: 4 / 8 / 12 / 16 / 24 / 32 / 48 / 64.
+   - WCAG 2.2 AA: visible focus, sufficient contrast, semantic HTML
+     (applied in NewsApp.jsx), reduced-motion support.
+   - Category colour stays an accent only: dot + label, never a block.
+   - Skeleton class for loading states (mini-program + any async list). */
+
+:root {
+  color-scheme: light;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --text-xs: clamp(0.75rem, 0.70rem + 0.25vw, 0.8125rem);
+  --text-sm: clamp(0.875rem, 0.82rem + 0.28vw, 0.9375rem);
+  --text-base: clamp(1rem, 0.93rem + 0.38vw, 1.125rem);
+  --text-lg: clamp(1.125rem, 1.02rem + 0.53vw, 1.3125rem);
+  --text-xl: clamp(1.25rem, 1.10rem + 0.75vw, 1.5625rem);
+  --text-2xl: clamp(1.5rem, 1.28rem + 1.10vw, 2rem);
+  --text-3xl: clamp(1.875rem, 1.50rem + 1.88vw, 2.5rem);
+  --radius-sm: 6px;
+  --radius-md: 12px;
+}
+
+/* Magazine — warm editorial default. */
 [data-theme="magazine"] {
-  --bg: #faf7f1; --surface: #ffffff; --text: #1a1917; --muted: #6b6560;
-  --border: #e5ddd5; --accent: #b91c1c; --radius: 12px;
+  --bg: oklch(0.98 0.012 85);
+  --surface: oklch(1 0 0);
+  --text: oklch(0.24 0.008 60);
+  --muted: oklch(0.52 0.012 60);
+  --border: oklch(0.90 0.012 85);
+  --accent: oklch(0.48 0.18 25);
+  --radius: var(--radius-md);
   --font-head: "Noto Serif SC", Georgia, serif;
 }
+/* Newspaper — ink on paper, sharp corners. */
 [data-theme="newspaper"] {
-  --bg: #fdfbf7; --surface: #ffffff; --text: #111111; --muted: #555555;
-  --border: #d8d2c4; --accent: #111111; --radius: 2px;
+  --bg: oklch(0.99 0.004 90);
+  --surface: oklch(1 0 0);
+  --text: oklch(0.16 0 0);
+  --muted: oklch(0.42 0 0);
+  --border: oklch(0.86 0.008 90);
+  --accent: oklch(0.16 0 0);
+  --radius: 2px;
   --font-head: "Noto Serif SC", Georgia, serif;
 }
+/* Dark — flip the L axis, keep accents bright. */
 [data-theme="dark"] {
-  --bg: #0b0f1a; --surface: #111a2e; --text: #e6eaf0; --muted: #94a3b8;
-  --border: #1e293b; --accent: #7dd3fc; --radius: 12px;
+  color-scheme: dark;
+  --bg: oklch(0.20 0.02 260);
+  --surface: oklch(0.26 0.03 260);
+  --text: oklch(0.92 0.01 260);
+  --muted: oklch(0.70 0.02 260);
+  --border: oklch(0.32 0.03 260);
+  --accent: oklch(0.82 0.10 230);
+  --radius: var(--radius-md);
   --font-head: ui-sans-system, system-ui, sans-serif;
 }
+/* Light card — cool neutral. */
 [data-theme="light-card"] {
-  --bg: #f7f8fa; --surface: #ffffff; --text: #1f2937; --muted: #6b7280;
-  --border: #e5e7eb; --accent: #2563eb; --radius: 12px;
+  --bg: oklch(0.97 0.004 260);
+  --surface: oklch(1 0 0);
+  --text: oklch(0.25 0.02 260);
+  --muted: oklch(0.52 0.01 260);
+  --border: oklch(0.91 0.006 260);
+  --accent: oklch(0.48 0.20 260);
+  --radius: var(--radius-md);
   --font-head: ui-sans-system, system-ui, sans-serif;
 }
+/* Podcast — warm amber, morning feel. */
 [data-theme="podcast"] {
-  --bg: #fff8ec; --surface: #ffffff; --text: #1f2937; --muted: #6b7280;
-  --border: #f0d9a8; --accent: #ea580c; --radius: 12px;
+  --bg: oklch(0.97 0.03 85);
+  --surface: oklch(1 0 0);
+  --text: oklch(0.25 0.02 260);
+  --muted: oklch(0.52 0.01 260);
+  --border: oklch(0.89 0.04 85);
+  --accent: oklch(0.58 0.18 50);
+  --radius: var(--radius-md);
   --font-head: ui-sans-system, system-ui, sans-serif;
 }
-body { background: var(--bg); color: var(--text); line-height: 1.7; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  font-size: var(--text-base);
+}
+
 .headline { font-family: var(--font-head); line-height: 1.25; }
+.headline-1 { font-size: var(--text-3xl); font-weight: 700; }
+.headline-2 { font-size: var(--text-xl); font-weight: 700; }
+.headline-3 { font-size: var(--text-lg); font-weight: 700; line-height: 1.4; }
+.headline-3-top { font-size: var(--text-2xl); font-weight: 700; line-height: 1.3; }
+
+/* WCAG 2.2: focus must always be visible, never rely on colour alone. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Skeleton loading state (skill UX pattern): shimmer, not a spinner. */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--border);
+  border-radius: var(--radius-sm);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  animation: skeleton-shimmer 1.5s infinite;
+}
+@keyframes skeleton-shimmer {
+  to { transform: translateX(100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
